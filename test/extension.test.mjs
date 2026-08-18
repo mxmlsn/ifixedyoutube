@@ -111,32 +111,31 @@ test("fully watched subscription cards are eighty percent transparent", async ()
   assert.match(styles, /opacity:\s*0\.2/);
 });
 
-test("search cleanup preserves organic results and rejects inserted modules", async () => {
+test("search uses an immediate CSS allowlist without JavaScript rescanning", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
+  const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
 
-  assert.match(source, /YTD-VIDEO-RENDERER/);
-  assert.match(source, /YTD-CHANNEL-RENDERER/);
-  assert.match(source, /YTD-PLAYLIST-RENDERER/);
-  assert.match(source, /ytd-search-pyv-renderer/);
-  assert.match(source, /inserted-module/);
-});
-
-test("search mutations are filtered incrementally instead of rescanning the page", async () => {
-  const source = await readFile(new URL("content.js", projectRoot), "utf8");
-
-  assert.match(source, /scheduleSearchCleanup\(mutations\)/);
-  assert.match(source, /pendingSearchRoots\.add\(node\)/);
-  assert.match(source, /pendingRoot\.contains\(node\)/);
-  assert.match(source, /cleanSearch\(root\)/);
+  assert.match(styles, /> :not\(/);
+  assert.match(styles, /ytd-video-renderer/);
+  assert.match(styles, /ytd-channel-renderer/);
+  assert.match(styles, /ytd-playlist-renderer/);
+  assert.match(styles, /ytd-search-pyv-renderer/);
+  assert.doesNotMatch(source, /cleanSearch|scheduleSearchCleanup/);
   assert.match(source, /mode === "search" && lastMode === "search"/);
 });
 
-test("watch mode hides comments and recommendations", async () => {
+test("watch mode hides recommendations and keeps comments opt-in", async () => {
+  const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
 
   assert.match(styles, /yt-focus-watch ytd-watch-flexy #secondary/);
-  assert.match(styles, /yt-focus-watch ytd-watch-flexy #comments/);
+  assert.match(styles, /yt-focus-watch:not\(\.yt-focus-comments-open\)/);
+  assert.match(styles, /yt-focus-watch\.yt-focus-comments-open/);
   assert.doesNotMatch(styles, /yt-focus-watch ytd-watch-flexy #description/);
+  assert.match(source, /Show comments/);
+  assert.match(source, /Hide comments/);
+  assert.match(source, /scrollIntoView/);
+  assert.match(source, /videoId !== activeWatchVideoId/);
 });
 
 test("header keeps native controls and changes only their fill", async () => {
@@ -158,14 +157,13 @@ test("Watch Later removes its hero and preserves a full-width list", async () =>
   assert.match(styles, /padding:\s*0 !important/);
 });
 
-test("the YouTube favicon and extension icons use the red cross", async () => {
+test("only the extension icon uses the red cross", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const manifest = JSON.parse(
     await readFile(new URL("manifest.json", projectRoot), "utf8")
   );
 
-  assert.match(source, /replaceFavicon/);
-  assert.match(source, /stroke="#f00"/);
+  assert.doesNotMatch(source, /replaceFavicon|FAVICON_SVG|rel="icon"/);
   assert.equal(manifest.icons[128], "icons/icon128.png");
 });
 

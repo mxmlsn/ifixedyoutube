@@ -445,14 +445,30 @@
 :root.yt-focus-search ytd-in-feed-ad-layout-renderer,
 :root.yt-focus-search ytd-banner-promo-renderer,
 :root.yt-focus-search ytd-statement-banner-renderer,
-:root.yt-focus-search [data-yt-focus-hidden] {
+:root.yt-focus-search
+  ytd-search
+  ytd-item-section-renderer
+  > #contents
+  > :not(
+    ytd-video-renderer,
+    ytd-channel-renderer,
+    ytd-playlist-renderer,
+    ytd-radio-renderer,
+    ytd-show-renderer,
+    ytd-movie-renderer,
+    ytd-reel-shelf-renderer,
+    yt-lockup-view-model,
+    yt-did-you-mean-renderer,
+    ytd-showing-results-for-renderer,
+    ytd-message-renderer,
+    ytd-continuation-item-renderer
+  ) {
   display: none !important;
 }
 
-/* Watch: player + native metadata/description, without recommendations/comments. */
+/* Watch: player + native metadata/description, without recommendations. */
 :root.yt-focus-watch ytd-watch-flexy #secondary,
 :root.yt-focus-watch ytd-watch-flexy #related,
-:root.yt-focus-watch ytd-watch-flexy #comments,
 :root.yt-focus-watch ytd-watch-flexy #comments-leave-behind,
 :root.yt-focus-watch ytd-watch-flexy #chat,
 :root.yt-focus-watch ytd-watch-flexy ytd-live-chat-frame,
@@ -462,6 +478,42 @@
 :root.yt-focus-watch ytd-watch-flexy #merch-shelf,
 :root.yt-focus-watch ytd-watch-flexy #expandable-metadata {
   display: none !important;
+}
+
+:root.yt-focus-watch:not(.yt-focus-comments-open)
+  ytd-watch-flexy
+  #comments {
+  display: none !important;
+}
+
+:root.yt-focus-watch.yt-focus-comments-open ytd-watch-flexy #comments {
+  display: block !important;
+}
+
+.yt-focus-watch__comments-toggle {
+  display: inline-flex;
+  min-height: 34px;
+  margin-top: 10px;
+  border: 1px solid var(--yt-focus-border);
+  border-radius: 17px;
+  padding: 0 14px;
+  align-items: center;
+  background: transparent;
+  color: var(--yt-focus-foreground);
+  cursor: pointer;
+  font: 500 13px/1 Roboto, Arial, sans-serif;
+}
+
+.yt-focus-watch__comments-toggle:hover,
+.yt-focus-watch__comments-toggle:focus-visible {
+  border-color: var(--yt-focus-foreground);
+  background: var(--yt-focus-foreground);
+  color: var(--yt-focus-inverse);
+}
+
+.yt-focus-watch__comments-toggle:focus-visible {
+  outline: 2px solid #3ea6ff;
+  outline-offset: 2px;
 }
 
 :root.yt-focus-watch ytd-watch-flexy #columns {

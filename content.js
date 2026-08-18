@@ -7,6 +7,7 @@
   const SUBSCRIPTIONS_CLASS = "yt-focus-subscriptions";
   const WATCH_LATER_CLASS = "yt-focus-watch-later";
   const WATCH_CLASS = "yt-focus-watch";
+  const COMMENTS_OPEN_CLASS = "yt-focus-comments-open";
   const RECOMMENDATIONS_CLASS = "yt-focus-recommendations-open";
   const HOME_ID = "yt-focus-home";
   const HIDDEN_ATTRIBUTE = "data-yt-focus-hidden";
@@ -16,12 +17,8 @@
   const REMOVE_BUTTON_CLASS = "yt-focus-watch-later__remove";
   const SUBSCRIPTION_WATCH_BUTTON_CLASS =
     "yt-focus-subscriptions__watch-later";
+  const COMMENTS_BUTTON_CLASS = "yt-focus-watch__comments-toggle";
   const FULLY_WATCHED_ATTRIBUTE = "data-yt-focus-fully-watched";
-  const FAVICON_SVG =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">' +
-    '<path d="M30 30l68 68M98 30L30 98" fill="none" stroke="#f00" ' +
-    'stroke-linecap="round" stroke-width="22"/></svg>';
-  const FAVICON_URL = `data:image/svg+xml,${encodeURIComponent(FAVICON_SVG)}`;
 
   const PLAIN_HOME_VIDEO_RENDERERS = new Set([
     "YT-LOCKUP-VIEW-MODEL",
@@ -46,39 +43,6 @@
     ["watch", WATCH_CLASS]
   ]);
 
-  // These are YouTube's direct, organic search-result types. Everything else
-  // in the results stream is treated as an inserted module and removed.
-  const ORGANIC_RESULT_TAGS = new Set([
-    "YTD-VIDEO-RENDERER",
-    "YTD-CHANNEL-RENDERER",
-    "YTD-PLAYLIST-RENDERER",
-    "YTD-RADIO-RENDERER",
-    "YTD-SHOW-RENDERER",
-    "YTD-MOVIE-RENDERER",
-    "YTD-REEL-SHELF-RENDERER",
-    "YT-LOCKUP-VIEW-MODEL",
-    "YT-DID-YOU-MEAN-RENDERER",
-    "YTD-SHOWING-RESULTS-FOR-RENDERER",
-    "YTD-MESSAGE-RENDERER",
-    "YTD-CONTINUATION-ITEM-RENDERER"
-  ]);
-
-  const AD_SELECTORS = [
-    "ytd-search-pyv-renderer",
-    "ytd-ad-slot-renderer",
-    "ytd-promoted-sparkles-web-renderer",
-    "ytd-promoted-video-renderer",
-    "ytd-display-ad-renderer",
-    "ytd-in-feed-ad-layout-renderer",
-    "ytd-banner-promo-renderer",
-    "ytd-statement-banner-renderer"
-  ].join(",");
-  const SEARCH_AD_SELECTORS = AD_SELECTORS.split(",")
-    .map((selector) => `ytd-search ${selector}`)
-    .join(",");
-  const SEARCH_RESULT_SELECTOR =
-    "ytd-search ytd-item-section-renderer > #contents > *";
-
   const MOST_RELEVANT_TITLES = new Set([
     "most relevant",
     "самое актуальное",
@@ -89,9 +53,8 @@
   ]);
 
   let scheduled = false;
-  let searchCleanupScheduled = false;
   let lastMode = "";
-  const pendingSearchRoots = new Set();
+  let activeWatchVideoId = "";
 
   function getLocalDayKey() {
     const now = new Date();
@@ -186,31 +149,6 @@
     }
 
     return "youtube";
-  }
-
-  function replaceFavicon() {
-    if (!document.head) {
-      return;
-    }
-
-    let icons = document.querySelectorAll(
-      'link[rel="icon"], link[rel="shortcut icon"]'
-    );
-
-    if (icons.length === 0) {
-      const icon = document.createElement("link");
-      icon.rel = "icon";
-      icon.type = "image/svg+xml";
-      document.head.append(icon);
-      icons = [icon];
-    }
-
-    for (const icon of icons) {
-      if (icon.href !== FAVICON_URL) {
-        icon.type = "image/svg+xml";
-        icon.href = FAVICON_URL;
-      }
-    }
   }
 
   function buildHome() {
@@ -670,112 +608,71 @@
     }
   }
 
-  function clearSearchMarks() {
-    for (const node of document.querySelectorAll(`[${HIDDEN_ATTRIBUTE}]`)) {
-      node.removeAttribute(HIDDEN_ATTRIBUTE);
-    }
+  function getWatchVideoId() {
+    return new URLSearchParams(location.search).get("v") || "";
   }
 
-  function collectMatches(root, selector) {
-    const matches = [];
-
-    if (root instanceof Element && root.matches(selector)) {
-      matches.push(root);
-    }
-
-    if (root.querySelectorAll) {
-      matches.push(...root.querySelectorAll(selector));
-    }
-
-    return matches;
+  function updateCommentsButton(button) {
+    const isOpen = document.documentElement.classList.contains(
+      COMMENTS_OPEN_CLASS
+    );
+    button.textContent = isOpen ? "Hide comments" : "Show comments";
+    button.setAttribute("aria-expanded", String(isOpen));
   }
 
-  function markSearchResult(item) {
-    if (ORGANIC_RESULT_TAGS.has(item.tagName)) {
-      if (item.hasAttribute(HIDDEN_ATTRIBUTE)) {
-        item.removeAttribute(HIDDEN_ATTRIBUTE);
-      }
-    } else if (
-      item.getAttribute(HIDDEN_ATTRIBUTE) !== "inserted-module"
-    ) {
-      item.setAttribute(HIDDEN_ATTRIBUTE, "inserted-module");
-    }
+  function resetWatchEnhancements() {
+    document.documentElement.classList.remove(COMMENTS_OPEN_CLASS);
+    document.querySelectorAll(`.${COMMENTS_BUTTON_CLASS}`).forEach((button) => {
+      button.remove();
+    });
+    activeWatchVideoId = "";
   }
 
-  function cleanSearch(root = document) {
-    if (getMode() !== "search") {
+  function enhanceWatch() {
+    if (getMode() !== "watch") {
       return;
     }
 
-    // Ads sometimes live inside otherwise valid-looking wrappers.
-    for (const ad of collectMatches(root, SEARCH_AD_SELECTORS)) {
-      if (ad.getAttribute(HIDDEN_ATTRIBUTE) !== "advertisement") {
-        ad.setAttribute(HIDDEN_ATTRIBUTE, "advertisement");
-      }
+    const videoId = getWatchVideoId();
+    if (videoId !== activeWatchVideoId) {
+      document.documentElement.classList.remove(COMMENTS_OPEN_CLASS);
+      document
+        .querySelectorAll(`.${COMMENTS_BUTTON_CLASS}`)
+        .forEach((button) => button.remove());
+      activeWatchVideoId = videoId;
     }
 
-    // Keep only direct search entities. This removes shelves such as
-    // “People also watched”, “For you”, popular videos and related searches.
-    const results = new Set(collectMatches(root, SEARCH_RESULT_SELECTOR));
-    const containingResult =
-      root instanceof Element ? root.closest(SEARCH_RESULT_SELECTOR) : null;
-
-    if (containingResult) {
-      results.add(containingResult);
-    }
-
-    for (const item of results) {
-      markSearchResult(item);
-    }
-  }
-
-  function scheduleSearchCleanup(mutations) {
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (!(node instanceof Element)) {
-          continue;
-        }
-
-        let isAlreadyCovered = false;
-        for (const pendingRoot of pendingSearchRoots) {
-          if (pendingRoot.contains(node)) {
-            isAlreadyCovered = true;
-            break;
-          }
-
-          if (node.contains(pendingRoot)) {
-            pendingSearchRoots.delete(pendingRoot);
-          }
-        }
-
-        if (!isAlreadyCovered) {
-          pendingSearchRoots.add(node);
-        }
-      }
-    }
-
-    if (searchCleanupScheduled || pendingSearchRoots.size === 0) {
+    if (document.querySelector(`.${COMMENTS_BUTTON_CLASS}`)) {
       return;
     }
 
-    searchCleanupScheduled = true;
-    requestAnimationFrame(() => {
-      searchCleanupScheduled = false;
+    const description = document.querySelector(
+      "ytd-watch-metadata #description, " +
+        "ytd-watch-metadata #description-inline-expander"
+    );
+    if (!description) {
+      return;
+    }
 
-      if (getMode() !== "search") {
-        pendingSearchRoots.clear();
-        return;
-      }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = COMMENTS_BUTTON_CLASS;
+    button.setAttribute("aria-controls", "comments");
+    updateCommentsButton(button);
+    button.addEventListener("click", () => {
+      document.documentElement.classList.toggle(COMMENTS_OPEN_CLASS);
+      updateCommentsButton(button);
 
-      const roots = [...pendingSearchRoots];
-      pendingSearchRoots.clear();
-
-      for (const root of roots) {
-        if (root.isConnected) {
-          cleanSearch(root);
-        }
+      if (document.documentElement.classList.contains(COMMENTS_OPEN_CLASS)) {
+        requestAnimationFrame(() => {
+          document
+            .querySelector("ytd-watch-flexy #comments")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
       }
     });
+
+    description.insertAdjacentElement("afterend", button);
   }
 
   function cleanSubscriptions() {
@@ -817,8 +714,6 @@
     const mode = getMode();
     const root = document.documentElement;
 
-    replaceFavicon();
-
     root.classList.toggle(MINIMAL_CLASS, MINIMAL_MODES.has(mode));
 
     for (const [classMode, className] of MODE_CLASSES) {
@@ -833,12 +728,6 @@
       removeHome();
     }
 
-    if (mode === "search") {
-      cleanSearch();
-    } else if (lastMode === "search") {
-      clearSearchMarks();
-    }
-
     if (mode === "subscriptions") {
       cleanSubscriptions();
     }
@@ -849,6 +738,12 @@
 
     if (mode === "home") {
       cleanHomeRecommendations();
+    }
+
+    if (mode === "watch") {
+      enhanceWatch();
+    } else if (lastMode === "watch" || activeWatchVideoId) {
+      resetWatchEnhancements();
     }
 
     lastMode = mode;
@@ -870,11 +765,10 @@
   window.addEventListener("popstate", scheduleApply);
   window.addEventListener("pageshow", scheduleApply);
 
-  const observer = new MutationObserver((mutations) => {
+  const observer = new MutationObserver(() => {
     const mode = getMode();
 
     if (mode === "search" && lastMode === "search") {
-      scheduleSearchCleanup(mutations);
       return;
     }
 

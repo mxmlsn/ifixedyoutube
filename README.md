@@ -12,14 +12,16 @@ A focused YouTube extension for Chrome and Chromium-based browsers.
 
 - Minimal home screen with **Subscriptions** and **Watch Later**.
 - Optional recommendations, available twice a day and limited to regular videos.
-- No Shorts, Playables, ads, Mixes, membership promos, comments, or side recommendations.
+- Recommendation feeds exclude Shorts shelves, Playables, ads, Mixes, membership promos, and other inserted modules.
+- Native search, Create, notifications, and account controls remain available; other navigation is hidden.
 - Four-column Subscriptions grid without **Most relevant**.
 - Fully watched subscription videos are 80% transparent.
-- One-click **Add to Watch Later** button in the video preview.
+- Circular one-click **Add to Watch Later** button in the video preview.
 - Centered Watch Later list with one-click removal.
-- Fast incremental search filtering that keeps only content related to the query.
+- Instant CSS-only search filtering: relevant videos, channels, and playlists render without JavaScript rescanning; ads and inserted recommendation modules stay hidden.
+- Watch pages keep the player and description, hide side recommendations, and provide a small **Show comments** button. Comments stay open only for the current video until navigation or reload.
 - Native YouTube light/dark theme support.
-- Red cross favicon.
+- Red cross extension icon; YouTube keeps its original site favicon.
 
 ### Download and install
 
@@ -45,14 +47,16 @@ To update, download the newest `ifixedyoutube.zip`, replace the old files, then 
 
 - Чистая главная страница с кнопками **Subscriptions** и **Watch Later**.
 - Рекомендации доступны два раза в сутки и содержат только обычные видео.
-- Нет Shorts, Playables, рекламы, Mix, предложений членства, комментариев и боковых рекомендаций.
+- Из рекомендаций убраны блоки Shorts, Playables, реклама, Mix, предложения членства и другие вставные модули.
+- Остаются нативные поиск, Create, уведомления и аккаунт; остальная навигация скрыта.
 - Подписки в четыре колонки, без блока **Most relevant**.
 - Полностью просмотренные видео в подписках отображаются с прозрачностью 80%.
-- Добавление в **Watch Later** одной кнопкой прямо в preview видео.
+- Круглая кнопка добавления в **Watch Later** прямо в preview видео.
 - Отцентрированный список Watch Later с быстрым удалением.
-- Быстрая точечная фильтрация поиска оставляет только результаты по запросу.
+- Мгновенный CSS-фильтр поиска: видео, каналы и плейлисты по запросу отображаются без повторных JavaScript-обходов, а реклама и вставные рекомендации скрываются.
+- На странице просмотра остаются плеер и описание, боковые рекомендации скрыты. Небольшая кнопка **Show comments** временно открывает комментарии только для текущего видео — до перехода или перезагрузки.
 - Нативная поддержка светлой и тёмной темы YouTube.
-- Фавикон в виде красного крестика.
+- Красный крест используется только как иконка расширения; фавикон сайта YouTube не меняется.
 
 ### Скачивание и установка
 
