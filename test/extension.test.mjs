@@ -97,9 +97,10 @@ test("subscriptions add a native one-click Watch Later preview action", async ()
   assert.match(source, /nativeMenuButton\.click\(\)/);
   assert.match(styles, /yt-focus-subscriptions__watch-later/);
   assert.match(styles, /top:\s*112px/);
+  assert.match(styles, /border-radius:\s*50%/);
 });
 
-test("fully watched subscription cards are faded to fifty percent", async () => {
+test("fully watched subscription cards are eighty percent transparent", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
 
@@ -107,7 +108,7 @@ test("fully watched subscription cards are faded to fifty percent", async () => 
   assert.match(source, /ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment/);
   assert.match(source, /width >= 99/);
   assert.match(styles, /data-yt-focus-fully-watched/);
-  assert.match(styles, /opacity:\s*0\.5/);
+  assert.match(styles, /opacity:\s*0\.2/);
 });
 
 test("search cleanup preserves organic results and rejects inserted modules", async () => {
@@ -118,6 +119,16 @@ test("search cleanup preserves organic results and rejects inserted modules", as
   assert.match(source, /YTD-PLAYLIST-RENDERER/);
   assert.match(source, /ytd-search-pyv-renderer/);
   assert.match(source, /inserted-module/);
+});
+
+test("search mutations are filtered incrementally instead of rescanning the page", async () => {
+  const source = await readFile(new URL("content.js", projectRoot), "utf8");
+
+  assert.match(source, /scheduleSearchCleanup\(mutations\)/);
+  assert.match(source, /pendingSearchRoots\.add\(node\)/);
+  assert.match(source, /pendingRoot\.contains\(node\)/);
+  assert.match(source, /cleanSearch\(root\)/);
+  assert.match(source, /mode === "search" && lastMode === "search"/);
 });
 
 test("watch mode hides comments and recommendations", async () => {

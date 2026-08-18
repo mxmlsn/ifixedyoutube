@@ -1,3 +1,5 @@
+![I Fixed YouTube home screen](docs/home-screen.png)
+
 [English](#english) · [Русский](#русский)
 
 # English
@@ -12,10 +14,10 @@ A focused YouTube extension for Chrome and Chromium-based browsers.
 - Optional recommendations, available twice a day and limited to regular videos.
 - No Shorts, Playables, ads, Mixes, membership promos, comments, or side recommendations.
 - Four-column Subscriptions grid without **Most relevant**.
-- Fully watched subscription videos are faded to 50%.
+- Fully watched subscription videos are 80% transparent.
 - One-click **Add to Watch Later** button in the video preview.
 - Centered Watch Later list with one-click removal.
-- Search results contain only content related to the query.
+- Fast incremental search filtering that keeps only content related to the query.
 - Native YouTube light/dark theme support.
 - Red cross favicon.
 
@@ -45,10 +47,10 @@ To update, download the newest `ifixedyoutube.zip`, replace the old files, then 
 - Рекомендации доступны два раза в сутки и содержат только обычные видео.
 - Нет Shorts, Playables, рекламы, Mix, предложений членства, комментариев и боковых рекомендаций.
 - Подписки в четыре колонки, без блока **Most relevant**.
-- Полностью просмотренные видео в подписках отображаются с прозрачностью 50%.
+- Полностью просмотренные видео в подписках отображаются с прозрачностью 80%.
 - Добавление в **Watch Later** одной кнопкой прямо в preview видео.
 - Отцентрированный список Watch Later с быстрым удалением.
-- В поиске остаются только результаты по запросу.
+- Быстрая точечная фильтрация поиска оставляет только результаты по запросу.
 - Нативная поддержка светлой и тёмной темы YouTube.
 - Фавикон в виде красного крестика.
 

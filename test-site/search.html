@@ -25,5 +25,15 @@
       </ytd-item-section-renderer>
     </ytd-search>
     <script src="../content.js"></script>
+    <script>
+      window.setTimeout(() => {
+        const contents = document.querySelector("#contents");
+        contents.insertAdjacentHTML(
+          "beforeend",
+          '<ytd-video-renderer data-test-kind="dynamic-video">New matching video</ytd-video-renderer>' +
+            '<ytd-shelf-renderer data-test-kind="dynamic-recommendation">New inserted recommendations</ytd-shelf-renderer>'
+        );
+      }, 60);
+    </script>
   </body>
 </html>

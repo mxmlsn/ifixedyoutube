@@ -73,6 +73,11 @@
     "ytd-banner-promo-renderer",
     "ytd-statement-banner-renderer"
   ].join(",");
+  const SEARCH_AD_SELECTORS = AD_SELECTORS.split(",")
+    .map((selector) => `ytd-search ${selector}`)
+    .join(",");
+  const SEARCH_RESULT_SELECTOR =
+    "ytd-search ytd-item-section-renderer > #contents > *";
 
   const MOST_RELEVANT_TITLES = new Set([
     "most relevant",
@@ -84,7 +89,9 @@
   ]);
 
   let scheduled = false;
+  let searchCleanupScheduled = false;
   let lastMode = "";
+  const pendingSearchRoots = new Set();
 
   function getLocalDayKey() {
     const now = new Date();
@@ -669,31 +676,106 @@
     }
   }
 
-  function cleanSearch() {
+  function collectMatches(root, selector) {
+    const matches = [];
+
+    if (root instanceof Element && root.matches(selector)) {
+      matches.push(root);
+    }
+
+    if (root.querySelectorAll) {
+      matches.push(...root.querySelectorAll(selector));
+    }
+
+    return matches;
+  }
+
+  function markSearchResult(item) {
+    if (ORGANIC_RESULT_TAGS.has(item.tagName)) {
+      if (item.hasAttribute(HIDDEN_ATTRIBUTE)) {
+        item.removeAttribute(HIDDEN_ATTRIBUTE);
+      }
+    } else if (
+      item.getAttribute(HIDDEN_ATTRIBUTE) !== "inserted-module"
+    ) {
+      item.setAttribute(HIDDEN_ATTRIBUTE, "inserted-module");
+    }
+  }
+
+  function cleanSearch(root = document) {
     if (getMode() !== "search") {
       return;
     }
 
     // Ads sometimes live inside otherwise valid-looking wrappers.
-    for (const ad of document.querySelectorAll(`ytd-search ${AD_SELECTORS}`)) {
-      ad.setAttribute(HIDDEN_ATTRIBUTE, "advertisement");
+    for (const ad of collectMatches(root, SEARCH_AD_SELECTORS)) {
+      if (ad.getAttribute(HIDDEN_ATTRIBUTE) !== "advertisement") {
+        ad.setAttribute(HIDDEN_ATTRIBUTE, "advertisement");
+      }
     }
 
     // Keep only direct search entities. This removes shelves such as
     // “People also watched”, “For you”, popular videos and related searches.
-    const resultLists = document.querySelectorAll(
-      "ytd-search ytd-item-section-renderer > #contents"
-    );
+    const results = new Set(collectMatches(root, SEARCH_RESULT_SELECTOR));
+    const containingResult =
+      root instanceof Element ? root.closest(SEARCH_RESULT_SELECTOR) : null;
 
-    for (const list of resultLists) {
-      for (const item of list.children) {
-        if (ORGANIC_RESULT_TAGS.has(item.tagName)) {
-          item.removeAttribute(HIDDEN_ATTRIBUTE);
-        } else {
-          item.setAttribute(HIDDEN_ATTRIBUTE, "inserted-module");
+    if (containingResult) {
+      results.add(containingResult);
+    }
+
+    for (const item of results) {
+      markSearchResult(item);
+    }
+  }
+
+  function scheduleSearchCleanup(mutations) {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof Element)) {
+          continue;
+        }
+
+        let isAlreadyCovered = false;
+        for (const pendingRoot of pendingSearchRoots) {
+          if (pendingRoot.contains(node)) {
+            isAlreadyCovered = true;
+            break;
+          }
+
+          if (node.contains(pendingRoot)) {
+            pendingSearchRoots.delete(pendingRoot);
+          }
+        }
+
+        if (!isAlreadyCovered) {
+          pendingSearchRoots.add(node);
         }
       }
     }
+
+    if (searchCleanupScheduled || pendingSearchRoots.size === 0) {
+      return;
+    }
+
+    searchCleanupScheduled = true;
+    requestAnimationFrame(() => {
+      searchCleanupScheduled = false;
+
+      if (getMode() !== "search") {
+        pendingSearchRoots.clear();
+        return;
+      }
+
+      const roots = [...pendingSearchRoots];
+      pendingSearchRoots.clear();
+
+      for (const root of roots) {
+        if (root.isConnected) {
+          cleanSearch(root);
+        }
+      }
+    });
   }
 
   function cleanSubscriptions() {
@@ -788,7 +870,16 @@
   window.addEventListener("popstate", scheduleApply);
   window.addEventListener("pageshow", scheduleApply);
 
-  const observer = new MutationObserver(scheduleApply);
+  const observer = new MutationObserver((mutations) => {
+    const mode = getMode();
+
+    if (mode === "search" && lastMode === "search") {
+      scheduleSearchCleanup(mutations);
+      return;
+    }
+
+    scheduleApply();
+  });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   applyMode();
