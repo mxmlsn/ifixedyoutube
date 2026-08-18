@@ -1,4 +1,6 @@
-![I Fixed YouTube home screen](docs/home-screen.png)
+![I Fixed YouTube demo](docs/ifixedyoutube.gif)
+
+<sub>plz ignore green progress bar</sub>
 
 [English](#english) · [Русский](#русский)
 
