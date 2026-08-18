@@ -1,0 +1,505 @@
+/* Shared focused shell: hide navigation, but keep YouTube's native masthead. */
+:root.yt-focus-minimal {
+  --yt-focus-background: #fff;
+  --yt-focus-foreground: #0f0f0f;
+  --yt-focus-muted: #606060;
+  --yt-focus-border: #606060;
+  --yt-focus-inverse: #fff;
+  --yt-focus-disabled: #909090;
+  --yt-focus-error: #c5221f;
+}
+
+:root.yt-focus-minimal[dark] {
+  --yt-focus-background: #000;
+  --yt-focus-foreground: #f1f1f1;
+  --yt-focus-muted: #aaa;
+  --yt-focus-border: #606060;
+  --yt-focus-inverse: #0f0f0f;
+  --yt-focus-disabled: #777;
+  --yt-focus-error: #ff8a8a;
+}
+
+:root.yt-focus-minimal ytd-masthead #start,
+:root.yt-focus-minimal ytd-masthead #voice-search-button,
+:root.yt-focus-minimal ytd-masthead #ai-companion-button,
+:root.yt-focus-minimal ytd-masthead #search-button-narrow,
+:root.yt-focus-minimal ytd-mini-guide-renderer,
+:root.yt-focus-minimal tp-yt-app-drawer,
+:root.yt-focus-minimal ytd-app > #guide {
+  display: none !important;
+}
+
+:root.yt-focus-minimal #masthead-container {
+  left: 0 !important;
+  width: 100% !important;
+}
+
+:root.yt-focus-minimal ytd-masthead #container {
+  position: relative !important;
+  padding: 0 24px !important;
+}
+
+:root.yt-focus-minimal ytd-masthead #center {
+  position: absolute !important;
+  left: 50% !important;
+  width: min(680px, calc(100vw - 440px)) !important;
+  max-width: 680px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+:root.yt-focus-minimal ytd-masthead #center yt-searchbox,
+:root.yt-focus-minimal ytd-masthead #center ytd-searchbox {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+:root.yt-focus-minimal ytd-masthead #end {
+  margin-left: auto !important;
+}
+
+/* Remove fill only; borders, icons, type and behavior remain native YouTube. */
+:root.yt-focus-minimal .ytSearchboxComponentInputBox,
+:root.yt-focus-minimal .ytSearchboxComponentSearchButton,
+:root.yt-focus-minimal ytd-masthead #end .ytSpecButtonShapeNextHost {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Remove the space YouTube reserves for its guide. */
+:root.yt-focus-minimal ytd-page-manager {
+  width: 100% !important;
+  margin-left: 0 !important;
+}
+
+/* Home */
+:root.yt-focus-home {
+  color-scheme: light;
+  background: var(--yt-focus-background) !important;
+}
+
+:root.yt-focus-home[dark] {
+  color-scheme: dark;
+}
+
+:root.yt-focus-home body,
+:root.yt-focus-home ytd-app,
+:root.yt-focus-home #masthead-container,
+:root.yt-focus-home ytd-masthead,
+:root.yt-focus-home ytd-masthead #container {
+  background: var(--yt-focus-background) !important;
+}
+
+:root.yt-focus-home body {
+  overflow: hidden !important;
+}
+
+:root.yt-focus-home ytd-page-manager {
+  display: none !important;
+}
+
+:root.yt-focus-home #masthead-container,
+:root.yt-focus-home ytd-masthead #container {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+:root.yt-focus-home ytd-app > #content {
+  background: var(--yt-focus-background) !important;
+}
+
+/* YouTube keeps this fixed chip bar above the feed; it caused the gray/white strip. */
+:root.yt-focus-home ytd-feed-filter-chip-bar-renderer,
+:root.yt-focus-home ytd-app #frosted-glass {
+  display: none !important;
+}
+
+#yt-focus-home {
+  position: fixed;
+  z-index: 1900;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 96px 40px 40px;
+  background: var(--yt-focus-background);
+  color: var(--yt-focus-foreground);
+  font-family: Roboto, Arial, sans-serif;
+}
+
+#yt-focus-home[hidden] {
+  display: none !important;
+}
+
+.yt-focus-home__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  transform: translateY(-18px);
+}
+
+.yt-focus-home__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(52px, 8vw, 128px);
+}
+
+.yt-focus-home__link {
+  position: relative;
+  color: var(--yt-focus-foreground);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms ease, transform 140ms ease;
+}
+
+.yt-focus-home__link::after {
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.72);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.yt-focus-home__link:hover,
+.yt-focus-home__link:focus-visible {
+  color: var(--yt-focus-foreground);
+  transform: translateY(-2px);
+}
+
+.yt-focus-home__recommendations-button {
+  min-height: 42px;
+  border: 1px solid var(--yt-focus-foreground);
+  border-radius: 999px;
+  padding: 0 20px;
+  background: transparent;
+  color: var(--yt-focus-foreground);
+  cursor: pointer;
+  font: 500 14px/1 Roboto, Arial, sans-serif;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.yt-focus-home__recommendations-button:hover,
+.yt-focus-home__recommendations-button:focus-visible {
+  background: var(--yt-focus-foreground);
+  color: var(--yt-focus-inverse);
+}
+
+.yt-focus-home__recommendations-button:focus-visible {
+  outline: 2px solid #3ea6ff;
+  outline-offset: 4px;
+}
+
+.yt-focus-home__recommendations-button:disabled {
+  border-color: var(--yt-focus-disabled);
+  color: var(--yt-focus-disabled);
+  cursor: default;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open body {
+  overflow: auto !important;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open #yt-focus-home {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 430px;
+  padding-top: 76px;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open .yt-focus-home__content {
+  gap: 34px;
+  transform: none;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open ytd-page-manager {
+  display: block !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding-top: 430px !important;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open ytd-page-manager
+  ytd-ad-slot-renderer,
+:root.yt-focus-home.yt-focus-recommendations-open ytd-page-manager
+  ytd-in-feed-ad-layout-renderer,
+:root.yt-focus-home.yt-focus-recommendations-open ytd-page-manager
+  ytd-promoted-video-renderer {
+  display: none !important;
+}
+
+:root.yt-focus-home.yt-focus-recommendations-open
+  [data-yt-focus-hidden="home-non-video"],
+:root.yt-focus-home.yt-focus-recommendations-open
+  ytd-rich-grid-renderer
+  > #contents
+  > ytd-rich-section-renderer {
+  display: none !important;
+}
+
+.yt-focus-home__link:hover::after,
+.yt-focus-home__link:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.yt-focus-home__link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #3ea6ff;
+  outline-offset: 12px;
+}
+
+/* Subscriptions */
+:root.yt-focus-subscriptions ytd-shelf-renderer #subscribe-button,
+:root.yt-focus-subscriptions a[href="/feed/channels"],
+:root.yt-focus-subscriptions a[href^="/feed/subscriptions/shorts"],
+:root.yt-focus-subscriptions [data-yt-focus-hidden="subscriptions-most-relevant"] {
+  display: none !important;
+}
+
+:root.yt-focus-subscriptions ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: 4 !important;
+  --ytd-rich-grid-posts-per-row: 4 !important;
+  --ytd-rich-grid-item-min-width: 0px !important;
+}
+
+:root.yt-focus-subscriptions [data-yt-focus-fully-watched] {
+  opacity: 0.5 !important;
+  transition: opacity 160ms ease;
+}
+
+.yt-focus-subscriptions__watch-later {
+  display: none;
+}
+
+:root.yt-focus-subscriptions ytd-video-preview {
+  position: absolute !important;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later {
+  position: absolute;
+  z-index: 5;
+  top: 112px;
+  right: 16px;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  cursor: pointer;
+  place-items: center;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later:hover,
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later:focus-visible {
+  background: #f00;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -3px;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later[data-state="added"] {
+  background: #f00;
+  opacity: 1;
+}
+
+:root.yt-focus-subscriptions
+  ytd-video-preview
+  .yt-focus-subscriptions__watch-later[data-state="error"] {
+  background: #8b0000;
+}
+
+.yt-focus-subscriptions__watch-later svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+/* Watch Later: keep the sort control and video list, remove the hero/sidebar. */
+:root.yt-focus-watch-later ytd-browse[page-subtype="playlist"]
+  > ytd-playlist-header-renderer,
+:root.yt-focus-watch-later ytd-browse[page-subtype="playlist"]
+  > ytd-playlist-sidebar-renderer,
+:root.yt-focus-watch-later ytd-browse[page-subtype="playlist"]
+  ytd-alert-with-button-renderer {
+  display: none !important;
+}
+
+:root.yt-focus-watch-later ytd-browse[page-subtype="playlist"] {
+  display: block !important;
+  width: 100% !important;
+}
+
+:root.yt-focus-watch-later ytd-two-column-browse-results-renderer {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: calc(100% - 48px) !important;
+  max-width: 1200px !important;
+  margin: 24px auto 0 !important;
+  padding: 0 !important;
+}
+
+:root.yt-focus-watch-later ytd-two-column-browse-results-renderer > #primary,
+:root.yt-focus-watch-later ytd-playlist-video-list-renderer {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+:root.yt-focus-watch-later ytd-playlist-video-renderer #menu {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.yt-focus-watch-later__remove {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--yt-focus-border);
+  border-radius: 18px;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--yt-focus-foreground);
+  cursor: pointer;
+  font: 500 13px/1 Roboto, Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.yt-focus-watch-later__remove svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+.yt-focus-watch-later__remove:hover,
+.yt-focus-watch-later__remove:focus-visible {
+  border-color: var(--yt-focus-foreground);
+  background: var(--yt-focus-foreground);
+  color: var(--yt-focus-inverse);
+}
+
+.yt-focus-watch-later__remove:focus-visible {
+  outline: 2px solid #3ea6ff;
+  outline-offset: 2px;
+}
+
+.yt-focus-watch-later__remove:disabled {
+  cursor: progress;
+  opacity: 0.55;
+}
+
+.yt-focus-watch-later__remove[data-state="error"] {
+  border-color: var(--yt-focus-error);
+  color: var(--yt-focus-error);
+}
+
+/* Search */
+:root.yt-focus-search ytd-search-pyv-renderer,
+:root.yt-focus-search ytd-ad-slot-renderer,
+:root.yt-focus-search ytd-promoted-sparkles-web-renderer,
+:root.yt-focus-search ytd-promoted-video-renderer,
+:root.yt-focus-search ytd-display-ad-renderer,
+:root.yt-focus-search ytd-in-feed-ad-layout-renderer,
+:root.yt-focus-search ytd-banner-promo-renderer,
+:root.yt-focus-search ytd-statement-banner-renderer,
+:root.yt-focus-search [data-yt-focus-hidden] {
+  display: none !important;
+}
+
+/* Watch: player + native metadata/description, without recommendations/comments. */
+:root.yt-focus-watch ytd-watch-flexy #secondary,
+:root.yt-focus-watch ytd-watch-flexy #related,
+:root.yt-focus-watch ytd-watch-flexy #comments,
+:root.yt-focus-watch ytd-watch-flexy #comments-leave-behind,
+:root.yt-focus-watch ytd-watch-flexy #chat,
+:root.yt-focus-watch ytd-watch-flexy ytd-live-chat-frame,
+:root.yt-focus-watch ytd-watch-flexy yt-ghost-comments,
+:root.yt-focus-watch ytd-watch-flexy #shopping-timely-shelf,
+:root.yt-focus-watch ytd-watch-flexy #ticket-shelf,
+:root.yt-focus-watch ytd-watch-flexy #merch-shelf,
+:root.yt-focus-watch ytd-watch-flexy #expandable-metadata {
+  display: none !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy #columns {
+  justify-content: center !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy #primary {
+  width: min(1120px, calc(100vw - 48px)) !important;
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding-right: 0 !important;
+}
+
+@media (max-width: 860px) {
+  :root.yt-focus-minimal ytd-masthead #center {
+    left: 20px !important;
+    width: calc(100vw - 300px) !important;
+    transform: none !important;
+  }
+
+  .yt-focus-home__links {
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  :root.yt-focus-home.yt-focus-recommendations-open #yt-focus-home {
+    height: 500px;
+  }
+
+  :root.yt-focus-home.yt-focus-recommendations-open ytd-page-manager {
+    padding-top: 500px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yt-focus-home__link,
+  .yt-focus-home__link::after,
+  .yt-focus-home__recommendations-button {
+    transition: none;
+  }
+}

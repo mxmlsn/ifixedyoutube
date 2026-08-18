@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Focus Watch — behavior fixture</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; margin: 0; }
+      #masthead-container { position: fixed; z-index: 2000; inset: 0 0 auto; height: 56px; }
+      ytd-masthead, ytd-masthead #container { display: flex; width: 100%; height: 56px; align-items: center; }
+      ytd-masthead #start, ytd-masthead #end { width: 220px; }
+      ytd-masthead #center { display: flex; }
+      yt-searchbox { display: flex; width: 100%; height: 40px; }
+      yt-searchbox input { width: 100%; border: 1px solid #fff; border-radius: 20px 0 0 20px; padding: 0 18px; background: #000; color: #fff; }
+      yt-searchbox button { width: 64px; border: 1px solid #fff; border-left: 0; border-radius: 0 20px 20px 0; background: #000; color: #fff; }
+      ytd-page-manager { display: block; padding-top: 56px; }
+      #columns { display: flex; gap: 24px; padding: 12px 24px; }
+      #primary { flex: 1; }
+      #player { width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
+      ytd-watch-metadata { display: block; padding-top: 16px; color: #fff; font: 16px Arial, sans-serif; }
+      ytd-watch-metadata h1 { margin: 0 0 16px; font-size: 22px; }
+      #description { margin-top: 16px; border-radius: 12px; padding: 14px; }
+      #secondary { width: 360px; padding: 20px; background: #222; color: #fff; }
+      #comments { display: block; margin-top: 24px; padding: 20px; background: #222; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <ytd-app>
+      <div id="masthead-container">
+        <ytd-masthead>
+          <div id="container">
+            <div id="start">YouTube</div>
+            <div id="center">
+              <yt-searchbox class="ytSearchboxComponentHost" role="search">
+                <input class="ytSearchboxComponentInput" aria-label="Search" placeholder="Search">
+                <button class="ytSearchboxComponentSearchButton" aria-label="Search">⌕</button>
+              </yt-searchbox>
+            </div>
+            <div id="voice-search-button">Voice</div>
+            <div id="end">Create · Notifications · Account</div>
+          </div>
+        </ytd-masthead>
+      </div>
+      <ytd-page-manager>
+        <ytd-watch-flexy>
+          <div id="columns">
+            <div id="primary">
+              <div id="player" data-test-kind="video"></div>
+              <div id="below">
+                <div class="box">
+                  <ytd-watch-metadata>
+                    <h1>Video title</h1>
+                    <div>Channel · Subscribe · Like · Share · Save</div>
+                    <div id="description">Description, views and publication date.</div>
+                  </ytd-watch-metadata>
+                </div>
+                <div class="box">
+                  <ytd-comments id="comments" data-test-kind="comments">Comments</ytd-comments>
+                </div>
+              </div>
+            </div>
+            <div id="secondary" data-test-kind="recommendations">
+              <div id="related">Recommended videos</div>
+            </div>
+          </div>
+        </ytd-watch-flexy>
+      </ytd-page-manager>
+    </ytd-app>
+    <script src="../content.js"></script>
+  </body>
+</html>

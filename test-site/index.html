@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Focus Home — visual fixture</title>
+    <script>
+      if (new URLSearchParams(location.search).get("theme") !== "light") {
+        document.documentElement.setAttribute("dark", "");
+      }
+    </script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+      * { box-sizing: border-box; }
+      :root { --fixture-bg: #fff; --fixture-fg: #0f0f0f; --fixture-muted: #606060; --fixture-strip: #e5e5e5; }
+      :root[dark] { --fixture-bg: #0f0f0f; --fixture-fg: #f1f1f1; --fixture-muted: #aaa; --fixture-strip: #3f3f3f; }
+      html, body { width: 100%; height: 100%; margin: 0; background: var(--fixture-bg); color: var(--fixture-fg); }
+      #masthead-container { position: fixed; z-index: 2000; inset: 0 0 auto; height: 56px; }
+      ytd-masthead, ytd-masthead #container { display: flex; width: 100%; height: 56px; align-items: center; }
+      ytd-masthead #start { width: 220px; }
+      ytd-masthead #center { display: flex; align-items: center; }
+      yt-searchbox { display: flex; width: 100%; height: 40px; }
+      yt-searchbox input { width: 100%; min-width: 0; border: 1px solid var(--fixture-fg); border-radius: 20px 0 0 20px; padding: 0 18px; background: var(--fixture-bg); color: var(--fixture-fg); font: 16px Arial, sans-serif; outline: none; }
+      yt-searchbox button { width: 64px; border: 1px solid var(--fixture-fg); border-left: 0; border-radius: 0 20px 20px 0; background: var(--fixture-bg); color: var(--fixture-fg); }
+      ytd-masthead #end { display: flex; align-items: center; }
+      ytd-masthead #buttons { display: flex; gap: 10px; align-items: center; }
+      .top-button { display: grid; height: 40px; border: 0; border-radius: 20px; place-items: center; background: transparent; color: var(--fixture-fg); }
+      .create { grid-auto-flow: column; gap: 7px; padding: 0 13px; font: 500 14px Arial, sans-serif; }
+      .icon { width: 40px; padding: 0; }
+      .top-button svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+      .avatar { width: 32px; height: 32px; margin-left: 2px; border-radius: 50%; background: linear-gradient(145deg, #5e9cff, #9f65df); color: #fff; font: 600 14px Arial, sans-serif; }
+      #frosted-glass { position: fixed; z-index: 2018; inset: 56px 0 auto; height: 56px; background: var(--fixture-strip); }
+      ytd-feed-filter-chip-bar-renderer { position: fixed; z-index: 2019; inset: 56px 0 auto; display: block; height: 56px; padding: 17px 36px; background: var(--fixture-strip); color: var(--fixture-fg); font: 14px Arial, sans-serif; }
+      ytd-app > #content { position: fixed; inset: 56px 0 0; background: var(--fixture-strip); }
+      ytd-page-manager { display: block; min-height: 100vh; background: var(--fixture-bg); color: var(--fixture-fg); font: 16px Arial, sans-serif; }
+      .recommendations { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; padding: 28px 36px 56px; }
+      .recommendations > * { min-width: 0; }
+      .recommendation-thumb { aspect-ratio: 16 / 9; border-radius: 10px; background: linear-gradient(135deg, #1859d5, #e9538b); }
+      .recommendations > :nth-child(2n) .recommendation-thumb { background: linear-gradient(135deg, #6540c7, #23a876); }
+      .recommendation-title { margin-top: 12px; font-weight: 600; }
+      .recommendation-meta { margin-top: 6px; color: var(--fixture-muted); font-size: 14px; }
+      .non-video-card { min-height: 190px; border: 2px dashed #d33; border-radius: 10px; padding: 18px; background: #d334; font-weight: 600; }
+      ytd-continuation-item-renderer { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="masthead-container">
+      <ytd-masthead>
+        <div id="container">
+          <div id="start">YouTube</div>
+          <div id="center">
+            <yt-searchbox class="ytSearchboxComponentHost" role="search">
+              <input class="ytSearchboxComponentInput" aria-label="Search" placeholder="Search">
+              <button class="ytSearchboxComponentSearchButton" aria-label="Search">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle>
+                  <path d="m15.5 15.5 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"></path>
+                </svg>
+              </button>
+            </yt-searchbox>
+          </div>
+          <div id="voice-search-button">Voice</div>
+          <div id="end">
+            <div id="buttons">
+              <button class="top-button create" aria-label="Create">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                <span>Create</span>
+              </button>
+              <button class="top-button icon" aria-label="Notifications">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></svg>
+              </button>
+              <button class="top-button avatar" aria-label="Account menu">M</button>
+            </div>
+          </div>
+        </div>
+      </ytd-masthead>
+    </div>
+    <ytd-app>
+      <div id="frosted-glass"></div>
+      <ytd-feed-filter-chip-bar-renderer>All · Gaming · Music · Live</ytd-feed-filter-chip-bar-renderer>
+      <div id="content">
+        <ytd-page-manager id="page-manager">
+          <ytd-rich-grid-renderer>
+            <div id="contents" class="recommendations" aria-label="Recommendations">
+              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-one"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video one</div><div class="recommendation-meta">Channel · 120K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-two"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video two</div><div class="recommendation-meta">Channel · 84K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-section-renderer data-kind="shorts"><div id="content"><ytd-rich-shelf-renderer class="non-video-card">Shorts shelf</ytd-rich-shelf-renderer></div></ytd-rich-section-renderer>
+              <ytd-rich-item-renderer data-kind="playable"><div id="content"><yt-playables-section-view-model class="non-video-card"><a href="/playables/game">YouTube playable game</a></yt-playables-section-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-three"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video three</div><div class="recommendation-meta">Channel · 210K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="membership"><div id="content"><ytd-membership-offer-renderer class="non-video-card"><a href="/channel/example/join">Join this channel</a></ytd-membership-offer-renderer></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="ad"><div id="content"><ytd-ad-slot-renderer class="non-video-card"><a href="/watch?v=advertisement">Sponsored video</a></ytd-ad-slot-renderer></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="mix"><div id="content"><yt-lockup-view-model class="non-video-card"><a href="/watch?v=mix-one&amp;list=RDmix-one&amp;start_radio=1">Mix playlist</a></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-four"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video four</div><div class="recommendation-meta">Channel · 32K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-continuation-item-renderer></ytd-continuation-item-renderer>
+            </div>
+          </ytd-rich-grid-renderer>
+        </ytd-page-manager>
+      </div>
+    </ytd-app>
+    <script src="../content.js"></script>
+  </body>
+</html>

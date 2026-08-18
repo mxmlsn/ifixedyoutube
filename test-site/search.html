@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Focus Search — behavior fixture</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+      body { margin: 0; padding: 40px; background: #0f0f0f; color: #fff; font: 16px Arial, sans-serif; }
+      #contents > * { display: block; margin: 12px 0; padding: 16px; border: 1px solid #333; }
+    </style>
+  </head>
+  <body>
+    <ytd-search>
+      <ytd-item-section-renderer>
+        <div id="contents">
+          <ytd-video-renderer data-test-kind="video">Matching video</ytd-video-renderer>
+          <ytd-channel-renderer data-test-kind="channel">Matching channel</ytd-channel-renderer>
+          <ytd-playlist-renderer data-test-kind="playlist">Matching playlist</ytd-playlist-renderer>
+          <ytd-reel-shelf-renderer data-test-kind="shorts">Matching Shorts</ytd-reel-shelf-renderer>
+          <ytd-search-pyv-renderer data-test-kind="ad">Sponsored result</ytd-search-pyv-renderer>
+          <ytd-shelf-renderer data-test-kind="recommendation">People also watched</ytd-shelf-renderer>
+          <ytd-horizontal-card-list-renderer data-test-kind="related">Related searches</ytd-horizontal-card-list-renderer>
+        </div>
+      </ytd-item-section-renderer>
+    </ytd-search>
+    <script src="../content.js"></script>
+  </body>
+</html>
