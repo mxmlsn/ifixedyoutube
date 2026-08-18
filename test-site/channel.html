@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" dark>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Focus Channel — visual fixture</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; margin: 0; background: #0f0f0f; color: #f1f1f1; font: 16px Arial, sans-serif; }
+      #masthead-container { position: fixed; z-index: 2000; inset: 0 0 auto; height: 56px; background: #0f0f0f; }
+      ytd-masthead, ytd-masthead #container { display: flex; width: 100%; height: 56px; align-items: center; }
+      ytd-masthead #start, ytd-masthead #end { width: 220px; }
+      ytd-masthead #center { display: flex; }
+      yt-searchbox { display: flex; width: 100%; height: 40px; }
+      yt-searchbox input { flex: 1; border: 1px solid #555; border-radius: 20px 0 0 20px; padding: 0 18px; background: transparent; color: #fff; }
+      yt-searchbox button { width: 64px; border: 1px solid #555; border-left: 0; border-radius: 0 20px 20px 0; background: transparent; color: #fff; }
+      ytd-mini-guide-renderer { position: fixed; z-index: 10; inset: 56px auto 0 0; display: block; width: 72px; padding: 24px 8px; background: #181818; }
+      ytd-app > #guide { position: fixed; z-index: 9; inset: 56px auto 0 0; display: block; width: 240px; padding: 24px; background: #212121; }
+      ytd-page-manager { display: block; width: calc(100% - 240px); min-height: 100vh; margin-left: 240px; padding-top: 56px; }
+      .channel { max-width: 1280px; margin: 0 auto; padding: 36px; }
+      .banner { height: 210px; border-radius: 14px; background: linear-gradient(135deg, #ee365f, #315be8); }
+      .title { margin: 28px 0; font-size: 34px; font-weight: 700; }
+      .videos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .video { aspect-ratio: 16 / 9; border-radius: 10px; background: #282828; }
+    </style>
+  </head>
+  <body>
+    <div id="masthead-container">
+      <ytd-masthead>
+        <div id="container">
+          <div id="start">YouTube</div>
+          <div id="center"><yt-searchbox><input placeholder="Search"><button aria-label="Search">⌕</button></yt-searchbox></div>
+          <div id="end">Create · Notifications · Account</div>
+        </div>
+      </ytd-masthead>
+    </div>
+    <ytd-app>
+      <div id="guide">Home<br><br>Shorts<br><br>Subscriptions<br><br>Explore</div>
+      <ytd-mini-guide-renderer>Home<br><br>Shorts<br><br>Subs</ytd-mini-guide-renderer>
+      <ytd-page-manager>
+        <main class="channel">
+          <div class="banner"></div>
+          <div class="title">Channel name</div>
+          <div class="videos"><div class="video"></div><div class="video"></div><div class="video"></div><div class="video"></div></div>
+        </main>
+      </ytd-page-manager>
+    </ytd-app>
+    <script src="../content.js"></script>
+  </body>
+</html>

@@ -31,7 +31,8 @@
     "search",
     "subscriptions",
     "watch-later",
-    "watch"
+    "watch",
+    "channel"
   ]);
 
   const MODE_CLASSES = new Map([
@@ -145,6 +146,14 @@
 
     if (location.pathname === "/watch") {
       return "watch";
+    }
+
+    if (
+      /^\/(?:@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+)(?:\/|$)/.test(
+        location.pathname
+      )
+    ) {
+      return "channel";
     }
 
     return "youtube";

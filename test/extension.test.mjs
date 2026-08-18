@@ -70,6 +70,19 @@ test("minimal mode covers subscriptions, Watch Later, search and watching", asyn
   assert.match(source, /yt-focus-minimal/);
 });
 
+test("channel pages use the minimal shell without the left guide", async () => {
+  const source = await readFile(new URL("content.js", projectRoot), "utf8");
+  const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
+
+  assert.match(source, /@\[\^\/\]\+/);
+  assert.match(source, /channel\\\/\[\^\/\]\+/);
+  assert.match(source, /user\\\/\[\^\/\]\+/);
+  assert.match(source, /return "channel"/);
+  assert.match(styles, /ytd-mini-guide-renderer/);
+  assert.match(styles, /ytd-app > #guide/);
+  assert.match(styles, /margin-left:\s*0/);
+});
+
 test("subscriptions cleanup removes the Most relevant shelf", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
