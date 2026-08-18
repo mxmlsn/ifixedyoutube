@@ -36,11 +36,21 @@
       .recommendations { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; padding: 28px 36px 56px; }
       .recommendations > * { min-width: 0; }
       .recommendation-thumb { aspect-ratio: 16 / 9; border-radius: 10px; background: linear-gradient(135deg, #1859d5, #e9538b); }
+      .ytLockupViewModelContentImage { display: block; }
       .recommendations > :nth-child(2n) .recommendation-thumb { background: linear-gradient(135deg, #6540c7, #23a876); }
       .recommendation-title { margin-top: 12px; font-weight: 600; }
       .recommendation-meta { margin-top: 6px; color: var(--fixture-muted); font-size: 14px; }
+      .card-menu { float: right; width: 40px; height: 40px; border: 0; background: transparent; color: var(--fixture-fg); font-size: 24px; }
       .non-video-card { min-height: 190px; border: 2px dashed #d33; border-radius: 10px; padding: 18px; background: #d334; font-weight: 600; }
       ytd-continuation-item-renderer { display: none; }
+      ytd-video-preview { position: absolute; z-index: 2100; top: 514px; left: 36px; display: none; width: calc((100vw - 120px) / 4); aspect-ratio: 16 / 9; background: linear-gradient(135deg, #111c, #333c); pointer-events: auto; }
+      :root.yt-focus-recommendations-open ytd-video-preview { display: block; }
+      .ytmMuteButtonButton, .ytmClosedCaptioningButtonButton { position: absolute; right: 16px; width: 48px; height: 48px; border: 0; background: #000b; color: #fff; }
+      .ytmMuteButtonButton { top: 16px; }
+      .ytmClosedCaptioningButtonButton { top: 64px; }
+      yt-sheet-view-model { position: fixed; z-index: 4000; top: 120px; right: 30px; display: block; width: 260px; padding: 8px; background: #282828; }
+      yt-list-view-model, yt-list-item-view-model { display: block; }
+      yt-list-view-model button { width: 100%; border: 0; padding: 12px; background: transparent; color: #fff; text-align: left; }
     </style>
   </head>
   <body>
@@ -82,7 +92,7 @@
         <ytd-page-manager id="page-manager">
           <ytd-rich-grid-renderer>
             <div id="contents" class="recommendations" aria-label="Recommendations">
-              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-one"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video one</div><div class="recommendation-meta">Channel · 120K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
+              <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a class="ytLockupViewModelContentImage" href="/watch?v=video-one"><div class="recommendation-thumb"></div></a><button class="card-menu" aria-label="More actions">⋮</button><div class="recommendation-title">Recommended video one</div><div class="recommendation-meta">Channel · 120K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
               <ytd-rich-item-renderer data-kind="video"><div id="content"><yt-lockup-view-model><a href="/watch?v=video-two"><div class="recommendation-thumb"></div></a><div class="recommendation-title">Recommended video two</div><div class="recommendation-meta">Channel · 84K views</div></yt-lockup-view-model></div></ytd-rich-item-renderer>
               <ytd-rich-section-renderer data-kind="shorts"><div id="content"><ytd-rich-shelf-renderer class="non-video-card">Shorts shelf</ytd-rich-shelf-renderer></div></ytd-rich-section-renderer>
               <ytd-rich-item-renderer data-kind="playable"><div id="content"><yt-playables-section-view-model class="non-video-card"><a href="/playables/game">YouTube playable game</a></yt-playables-section-view-model></div></ytd-rich-item-renderer>
@@ -97,6 +107,33 @@
         </ytd-page-manager>
       </div>
     </ytd-app>
+    <ytd-video-preview>
+      <button class="ytmMuteButtonButton" aria-label="Unmute">♪</button>
+      <button class="ytmClosedCaptioningButtonButton" aria-label="Subtitles/CC turned on">CC</button>
+    </ytd-video-preview>
+    <script>
+      document.addEventListener("click", (event) => {
+        const menuButton = event.target.closest('button[aria-label="More actions"]');
+        if (!menuButton) return;
+
+        document.querySelector("yt-sheet-view-model")?.remove();
+        const card = menuButton.closest("ytd-rich-item-renderer");
+        const sheet = document.createElement("yt-sheet-view-model");
+        const list = document.createElement("yt-list-view-model");
+        const item = document.createElement("yt-list-item-view-model");
+        const save = document.createElement("button");
+        save.setAttribute("role", "menuitem");
+        save.textContent = "Save to Watch later";
+        save.addEventListener("click", () => {
+          card.dataset.watchLaterAdded = "true";
+          sheet.remove();
+        });
+        item.append(save);
+        list.append(item);
+        sheet.append(list);
+        document.body.append(sheet);
+      });
+    </script>
     <script src="../content.js"></script>
   </body>
 </html>

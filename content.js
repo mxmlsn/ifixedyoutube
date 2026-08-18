@@ -15,8 +15,7 @@
   const RECOMMENDATION_USAGE_KEY = "yt-focus-recommendations-v1";
   const DAILY_RECOMMENDATION_LIMIT = 2;
   const REMOVE_BUTTON_CLASS = "yt-focus-watch-later__remove";
-  const SUBSCRIPTION_WATCH_BUTTON_CLASS =
-    "yt-focus-subscriptions__watch-later";
+  const PREVIEW_WATCH_BUTTON_CLASS = "yt-focus-preview__watch-later";
   const COMMENTS_BUTTON_CLASS = "yt-focus-watch__comments-toggle";
   const FULLY_WATCHED_ATTRIBUTE = "data-yt-focus-fully-watched";
 
@@ -204,6 +203,7 @@
       writeRecommendationUsage(usage);
       root.classList.add(RECOMMENDATIONS_CLASS);
       updateRecommendationButton(recommendationsButton);
+      scheduleApply();
     });
 
     updateRecommendationButton(recommendationsButton);
@@ -385,7 +385,7 @@
     });
   }
 
-  function findSubscriptionCardForPreview(preview) {
+  function findVideoCardForPreview(preview) {
     const previewRect = preview.getBoundingClientRect();
     let bestCard = null;
     let bestOverlap = 0;
@@ -393,7 +393,8 @@
     for (const card of document.querySelectorAll("ytd-rich-item-renderer")) {
       const thumbnail = card.querySelector(
         'a.ytLockupViewModelContentImage[href^="/watch?"], ' +
-          'a#thumbnail[href^="/watch?"]'
+          'a#thumbnail[href^="/watch?"], ' +
+          'a[href^="/watch?"]'
       );
 
       if (!thumbnail) {
@@ -422,8 +423,8 @@
     return bestCard;
   }
 
-  function syncSubscriptionWatchButton(preview, button) {
-    const card = findSubscriptionCardForPreview(preview);
+  function syncPreviewWatchButton(preview, button) {
+    const card = findVideoCardForPreview(preview);
     const href = card
       ?.querySelector('a[href^="/watch?"]')
       ?.getAttribute("href");
@@ -446,8 +447,8 @@
     return card;
   }
 
-  async function addSubscriptionVideoToWatchLater(preview, button) {
-    const card = syncSubscriptionWatchButton(preview, button);
+  async function addPreviewVideoToWatchLater(preview, button) {
+    const card = syncPreviewWatchButton(preview, button);
     const nativeMenuButton = card?.querySelector(
       'button[aria-label="More actions"], button[aria-label="Action menu"]'
     );
@@ -493,30 +494,30 @@
     }, 1800);
   }
 
-  function enhanceSubscriptionPreviews() {
+  function enhanceVideoPreviews() {
     for (const preview of document.querySelectorAll("ytd-video-preview")) {
-      let button = preview.querySelector(`.${SUBSCRIPTION_WATCH_BUTTON_CLASS}`);
+      let button = preview.querySelector(`.${PREVIEW_WATCH_BUTTON_CLASS}`);
 
       if (!button) {
         button = document.createElement("button");
         button.type = "button";
-        button.className = SUBSCRIPTION_WATCH_BUTTON_CLASS;
+        button.className = PREVIEW_WATCH_BUTTON_CLASS;
         button.innerHTML =
           '<svg viewBox="0 0 24 24" aria-hidden="true">' +
           '<circle cx="10" cy="11" r="7"></circle>' +
           '<path d="M10 7v4l3 2M18 16v6M15 19h6"></path></svg>';
         button.addEventListener("mouseenter", () => {
-          syncSubscriptionWatchButton(preview, button);
+          syncPreviewWatchButton(preview, button);
         });
         button.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
-          addSubscriptionVideoToWatchLater(preview, button);
+          addPreviewVideoToWatchLater(preview, button);
         });
         preview.append(button);
       }
 
-      syncSubscriptionWatchButton(preview, button);
+      syncPreviewWatchButton(preview, button);
     }
   }
 
@@ -705,7 +706,7 @@
     }
 
     markFullyWatchedSubscriptionVideos();
-    enhanceSubscriptionPreviews();
+    enhanceVideoPreviews();
   }
 
   function applyMode() {
@@ -738,6 +739,9 @@
 
     if (mode === "home") {
       cleanHomeRecommendations();
+      if (root.classList.contains(RECOMMENDATIONS_CLASS)) {
+        enhanceVideoPreviews();
+      }
     }
 
     if (mode === "watch") {

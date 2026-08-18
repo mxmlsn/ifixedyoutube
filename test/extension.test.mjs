@@ -87,15 +87,17 @@ test("subscriptions use a four-column grid", async () => {
   assert.match(styles, /--ytd-rich-grid-posts-per-row:\s*4/);
 });
 
-test("subscriptions add a native one-click Watch Later preview action", async () => {
+test("subscriptions and recommendations add a one-click Watch Later preview action", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
 
-  assert.match(source, /enhanceSubscriptionPreviews/);
+  assert.match(source, /enhanceVideoPreviews/);
+  assert.match(source, /root\.classList\.contains\(RECOMMENDATIONS_CLASS\)/);
   assert.match(source, /isSaveToWatchLaterLabel/);
   assert.match(source, /yt-list-view-model button\[role="menuitem"\]/);
   assert.match(source, /nativeMenuButton\.click\(\)/);
-  assert.match(styles, /yt-focus-subscriptions__watch-later/);
+  assert.match(styles, /yt-focus-preview__watch-later/);
+  assert.match(styles, /yt-focus-home\.yt-focus-recommendations-open/);
   assert.match(styles, /top:\s*112px/);
   assert.match(styles, /border-radius:\s*50%/);
 });

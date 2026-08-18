@@ -278,17 +278,24 @@
   transition: opacity 160ms ease;
 }
 
-.yt-focus-subscriptions__watch-later {
+.yt-focus-preview__watch-later {
   display: none;
 }
 
-:root.yt-focus-subscriptions ytd-video-preview {
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
+  ytd-video-preview {
   position: absolute !important;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later {
+  .yt-focus-preview__watch-later {
   position: absolute;
   z-index: 5;
   top: 112px;
@@ -305,43 +312,61 @@
   place-items: center;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later:hover,
-:root.yt-focus-subscriptions
+  .yt-focus-preview__watch-later:hover,
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later:focus-visible {
+  .yt-focus-preview__watch-later:focus-visible {
   background: #f00;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later:focus-visible {
+  .yt-focus-preview__watch-later:focus-visible {
   outline: 2px solid #fff;
   outline-offset: -3px;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later:disabled {
+  .yt-focus-preview__watch-later:disabled {
   cursor: default;
   opacity: 0.65;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later[data-state="added"] {
+  .yt-focus-preview__watch-later[data-state="added"] {
   background: #f00;
   opacity: 1;
 }
 
-:root.yt-focus-subscriptions
+:is(
+    :root.yt-focus-subscriptions,
+    :root.yt-focus-home.yt-focus-recommendations-open
+  )
   ytd-video-preview
-  .yt-focus-subscriptions__watch-later[data-state="error"] {
+  .yt-focus-preview__watch-later[data-state="error"] {
   background: #8b0000;
 }
 
-.yt-focus-subscriptions__watch-later svg {
+.yt-focus-preview__watch-later svg {
   width: 24px;
   height: 24px;
   fill: none;
