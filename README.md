@@ -29,7 +29,7 @@ A distraction-free YouTube extension for Chromium browsers.
 3. Unzip `ifixedyoutube.zip` into a permanent folder.
 4. Open `chrome://extensions` in Chrome, Edge, Brave, Arc, or another Chromium browser.
 5. Enable **Developer mode**.
-6. Click **Load unpacked** and select the unzipped folder containing `manifest.json`.
+6. Click **Load unpacked** and select the entire unzipped `ifixedyoutube` folder.
 7. Refresh any open YouTube tabs.
 
 To update, download the newest `ifixedyoutube.zip`, replace the old files, then click **Reload** on the extension page.
@@ -61,7 +61,7 @@ YouTube без лишнего для Chrome и других Chromium-брауз�
 3. Распакуйте `ifixedyoutube.zip` в постоянную папку.
 4. Откройте `chrome://extensions` в Chrome, Edge, Brave, Arc или другом Chromium-браузере.
 5. Включите **Режим разработчика** / **Developer mode**.
-6. Нажмите **Загрузить распакованное расширение** / **Load unpacked** и выберите распакованную папку, в которой находится `manifest.json`.
+6. Нажмите **Загрузить распакованное расширение** / **Load unpacked** и выберите целиком распакованную папку `ifixedyoutube`.
 7. Обновите открытые вкладки YouTube.
 
 Для обновления скачайте новый `ifixedyoutube.zip`, замените старые файлы и нажмите **Перезагрузить** / **Reload** на странице расширений.
