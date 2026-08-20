@@ -19,6 +19,25 @@ test("manifest is a minimal Manifest V3 extension", async () => {
   assert.equal(manifest.host_permissions, undefined);
 });
 
+test("release metadata and notes are aligned", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("manifest.json", projectRoot), "utf8")
+  );
+  const packageJson = JSON.parse(
+    await readFile(new URL("package.json", projectRoot), "utf8")
+  );
+  const releaseNotes = await readFile(
+    new URL("RELEASE_NOTES.md", projectRoot),
+    "utf8"
+  );
+
+  assert.equal(manifest.version, "1.8.2");
+  assert.equal(packageJson.version, manifest.version);
+  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.2/);
+  assert.match(releaseNotes, /recommendation wall/);
+  assert.match(releaseNotes, /сетка рекомендаций/);
+});
+
 test("content script parses and contains both requested destinations", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
 
@@ -151,6 +170,23 @@ test("watch mode hides recommendations and keeps comments opt-in", async () => {
   assert.match(source, /Hide comments/);
   assert.match(source, /scrollIntoView/);
   assert.match(source, /videoId !== activeWatchVideoId/);
+});
+
+test("watch mode hides in-player end-screen recommendations but keeps player controls", async () => {
+  const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
+  const fixture = await readFile(
+    new URL("test-site/watch.html", projectRoot),
+    "utf8"
+  );
+
+  assert.match(styles, /\.html5-video-player \.ytp-ce-element/);
+  assert.match(styles, /\.html5-video-player \.ytp-endscreen-content/);
+  assert.match(styles, /\.html5-video-player \.ytp-autonav-endscreen/);
+  assert.doesNotMatch(styles, /\.html5-video-player \.ytp-play-button/);
+  assert.match(fixture, /data-test-kind="end-card"/);
+  assert.match(fixture, /data-test-kind="recommendation-wall"/);
+  assert.match(fixture, /data-test-kind="autoplay-recommendation"/);
+  assert.match(fixture, /data-test-kind="replay"/);
 });
 
 test("header keeps native controls and changes only their fill", async () => {

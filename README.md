@@ -19,7 +19,7 @@ A distraction-free YouTube extension for Chromium browsers.
 - Watched subscription videos are 80% transparent.
 - One-click **Add to Watch Later** from Subscriptions and recommendation previews.
 - Centered Watch Later list with one-click removal.
-- Player and description without side recommendations; comments open on demand for the current video.
+- Player and description without side or end-screen recommendations; comments open on demand for the current video.
 - Native light and dark themes.
 
 ### Download and install
@@ -51,7 +51,7 @@ YouTube без лишнего для Chrome и других Chromium-брауз�
 - Просмотренные видео в подписках прозрачны на 80%.
 - Добавление в **Watch Later** одним кликом из preview в подписках и рекомендациях.
 - Отцентрированный список Watch Later с быстрым удалением.
-- Плеер и описание без боковых рекомендаций; комментарии открываются по кнопке для текущего видео.
+- Плеер и описание без боковых и финальных рекомендаций; комментарии открываются по кнопке для текущего видео.
 - Нативная светлая и тёмная темы.
 
 ### Скачивание и установка

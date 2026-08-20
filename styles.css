@@ -505,6 +505,13 @@
   display: none !important;
 }
 
+/* Hide recommendation cards during the video and the post-play video wall. */
+:root.yt-focus-watch .html5-video-player .ytp-ce-element,
+:root.yt-focus-watch .html5-video-player .ytp-endscreen-content,
+:root.yt-focus-watch .html5-video-player .ytp-autonav-endscreen {
+  display: none !important;
+}
+
 :root.yt-focus-watch:not(.yt-focus-comments-open)
   ytd-watch-flexy
   #comments {

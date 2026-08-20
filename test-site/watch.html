@@ -18,7 +18,9 @@
       ytd-page-manager { display: block; padding-top: 56px; }
       #columns { display: flex; gap: 24px; padding: 12px 24px; }
       #primary { flex: 1; }
-      #player { width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
+      #player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
+      .ytp-ce-element, .ytp-endscreen-content, .ytp-autonav-endscreen { position: absolute; inset: 20%; padding: 20px; background: #000; color: #fff; }
+      .ytp-play-button { position: absolute; z-index: 1; inset: 50% auto auto 50%; transform: translate(-50%, -50%); }
       ytd-watch-metadata { display: block; padding-top: 16px; color: #fff; font: 16px Arial, sans-serif; }
       ytd-watch-metadata h1 { margin: 0 0 16px; font-size: 22px; }
       #description { margin-top: 16px; border-radius: 12px; padding: 14px; }
@@ -47,7 +49,12 @@
         <ytd-watch-flexy>
           <div id="columns">
             <div id="primary">
-              <div id="player" data-test-kind="video"></div>
+              <div id="player" class="html5-video-player" data-test-kind="video">
+                <div class="ytp-ce-element" data-test-kind="end-card">End-screen card</div>
+                <div class="ytp-endscreen-content" data-test-kind="recommendation-wall">Recommended videos</div>
+                <div class="ytp-autonav-endscreen" data-test-kind="autoplay-recommendation">Up next</div>
+                <button class="ytp-play-button" data-test-kind="replay">Replay</button>
+              </div>
               <div id="below">
                 <div class="box">
                   <ytd-watch-metadata>
