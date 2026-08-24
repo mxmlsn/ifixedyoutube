@@ -31,11 +31,11 @@ test("release metadata and notes are aligned", async () => {
     "utf8"
   );
 
-  assert.equal(manifest.version, "1.8.2");
+  assert.equal(manifest.version, "1.8.3");
   assert.equal(packageJson.version, manifest.version);
-  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.2/);
-  assert.match(releaseNotes, /recommendation wall/);
-  assert.match(releaseNotes, /сетка рекомендаций/);
+  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.3/);
+  assert.match(releaseNotes, /fullscreen post-play recommendation grid/);
+  assert.match(releaseNotes, /полноэкранная сетка рекомендаций/);
 });
 
 test("content script parses and contains both requested destinations", async () => {
@@ -182,10 +182,14 @@ test("watch mode hides in-player end-screen recommendations but keeps player con
   assert.match(styles, /\.html5-video-player \.ytp-ce-element/);
   assert.match(styles, /\.html5-video-player \.ytp-endscreen-content/);
   assert.match(styles, /\.html5-video-player \.ytp-autonav-endscreen/);
+  assert.match(styles, /\.html5-video-player \.ytp-fullscreen-grid/);
+  assert.match(styles, /\.html5-video-player \.ytp-modern-videowall-still/);
   assert.doesNotMatch(styles, /\.html5-video-player \.ytp-play-button/);
   assert.match(fixture, /data-test-kind="end-card"/);
   assert.match(fixture, /data-test-kind="recommendation-wall"/);
   assert.match(fixture, /data-test-kind="autoplay-recommendation"/);
+  assert.match(fixture, /data-test-kind="modern-recommendation-grid"/);
+  assert.match(fixture, /data-test-kind="modern-recommendation"/);
   assert.match(fixture, /data-test-kind="replay"/);
 });
 
