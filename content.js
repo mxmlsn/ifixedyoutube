@@ -622,6 +622,42 @@
     return new URLSearchParams(location.search).get("v") || "";
   }
 
+  function seekFocusedPlayer(event) {
+    if (
+      getMode() !== "watch" ||
+      (event.key !== "ArrowLeft" && event.key !== "ArrowRight") ||
+      event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
+      event.defaultPrevented || document.fullscreenElement
+    ) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const player = target.closest(".html5-video-player");
+    if (
+      !player || player.classList.contains("ytp-fullscreen") ||
+      target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="slider"], [role="menuitem"]')
+    ) {
+      return;
+    }
+
+    const video = player.querySelector("video");
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
+      return;
+    }
+
+    // Handle the focused, windowed player before page scrolling or native
+    // handlers. Stop propagation so YouTube cannot seek a second time.
+    const step = event.key === "ArrowRight" ? 5 : -5;
+    video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + step));
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
   function updateCommentsButton(button) {
     const isOpen = document.documentElement.classList.contains(
       COMMENTS_OPEN_CLASS
@@ -770,6 +806,8 @@
     scheduled = true;
     requestAnimationFrame(applyMode);
   }
+
+  document.addEventListener("keydown", seekFocusedPlayer, true);
 
   // YouTube is a single-page app, so URL changes do not always reload scripts.
   document.addEventListener("yt-navigate-start", scheduleApply, true);

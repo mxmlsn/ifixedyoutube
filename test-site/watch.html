@@ -17,7 +17,12 @@
       yt-searchbox button { width: 64px; border: 1px solid #fff; border-left: 0; border-radius: 0 20px 20px 0; background: #000; color: #fff; }
       ytd-page-manager { display: block; padding-top: 56px; }
       #columns { display: flex; gap: 24px; padding: 12px 24px; }
-      #primary { flex: 1; }
+      ytd-watch-flexy { display: block; min-width: 1100px; }
+      #primary { flex: 1; min-width: 900px; }
+      #secondary-inner { position: relative; left: 0; width: 402px; }
+      ytd-engagement-panel-section-list-renderer { display: block; padding: 16px; background: #eee; }
+      ytd-engagement-panel-section-list-renderer:not([visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]) { display: none; }
+      #expandable-metadata { padding-top: 12px; }
       #player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
       .ytp-ce-element, .ytp-endscreen-content, .ytp-autonav-endscreen, .ytp-fullscreen-grid { position: absolute; inset: 20%; padding: 20px; background: #000; color: #fff; }
       .ytp-play-button { position: absolute; z-index: 1; inset: 50% auto auto 50%; transform: translate(-50%, -50%); }
@@ -41,7 +46,7 @@
               </yt-searchbox>
             </div>
             <div id="voice-search-button">Voice</div>
-            <div id="end">Create · Notifications · Account</div>
+            <div id="end"><button id="ai-companion-button" data-open-panel="gemini">Gemini</button> · Account</div>
           </div>
         </ytd-masthead>
       </div>
@@ -49,7 +54,8 @@
         <ytd-watch-flexy>
           <div id="columns">
             <div id="primary">
-              <div id="player" class="html5-video-player" data-test-kind="video">
+              <div id="player" class="html5-video-player" data-test-kind="video" tabindex="0">
+                <video preload="auto" src="/test-media.wav" style="width:100%;height:100%;position:absolute;inset:0"></video>
                 <div class="ytp-ce-element" data-test-kind="end-card">End-screen card</div>
                 <div class="ytp-endscreen-content" data-test-kind="recommendation-wall">Recommended videos</div>
                 <div class="ytp-autonav-endscreen" data-test-kind="autoplay-recommendation">Up next</div>
@@ -67,7 +73,10 @@
                   <ytd-watch-metadata>
                     <h1>Video title</h1>
                     <div>Channel · Subscribe · Like · Share · Save</div>
-                    <div id="description">Description, views and publication date.</div>
+                    <div id="description">Description, views and publication date.
+                      <div id="expandable-metadata"><button data-open-panel="chapters">Show chapters</button></div>
+                      <button data-open-panel="gemini">Ask Gemini</button>
+                    </div>
                   </ytd-watch-metadata>
                 </div>
                 <div class="box">
@@ -76,12 +85,44 @@
               </div>
             </div>
             <div id="secondary" data-test-kind="recommendations">
-              <div id="related">Recommended videos</div>
+              <div id="secondary-inner">
+                <div id="related">Recommended videos</div>
+                <ytd-engagement-panel-section-list-renderer data-panel="chapters" visibility="ENGAGEMENT_PANEL_VISIBILITY_HIDDEN">
+                  <h2>Chapters</h2><button data-close-panel>Close chapters</button>
+                  <button data-seek="60">Chapter 2 — 1:00</button>
+                </ytd-engagement-panel-section-list-renderer>
+                <ytd-engagement-panel-section-list-renderer data-panel="gemini" visibility="ENGAGEMENT_PANEL_VISIBILITY_HIDDEN">
+                  <h2>Gemini</h2><button data-close-panel>Close Gemini</button>
+                  <label>Ask about this video <input id="gemini-question"></label><button id="gemini-send">Ask</button>
+                  <output id="gemini-answer"></output>
+                </ytd-engagement-panel-section-list-renderer>
+              </div>
             </div>
           </div>
         </ytd-watch-flexy>
       </ytd-page-manager>
     </ytd-app>
+    <script>
+      // Model native YouTube handlers; the extension must leave them reachable.
+      const panels = document.querySelectorAll('[data-panel]');
+      document.querySelectorAll('[data-open-panel]').forEach(button => {
+        button.addEventListener('click', () => panels.forEach(panel => {
+          panel.setAttribute('visibility', panel.dataset.panel === button.dataset.openPanel
+            ? 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED' : 'ENGAGEMENT_PANEL_VISIBILITY_HIDDEN');
+        }));
+      });
+      document.querySelectorAll('[data-close-panel]').forEach(button => {
+        button.addEventListener('click', () => button.closest('[data-panel]').setAttribute('visibility', 'ENGAGEMENT_PANEL_VISIBILITY_HIDDEN'));
+      });
+      const player = document.querySelector('#player');
+      const video = player.querySelector('video');
+      document.querySelector('[data-seek]').addEventListener('click', event => {
+        video.currentTime = Number(event.target.dataset.seek);
+      });
+      document.querySelector('#gemini-send').addEventListener('click', () => {
+        document.querySelector('#gemini-answer').textContent = 'Question received: ' + document.querySelector('#gemini-question').value;
+      });
+    </script>
     <script src="../content.js"></script>
   </body>
 </html>

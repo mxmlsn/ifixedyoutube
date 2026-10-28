@@ -65,3 +65,17 @@ YouTube без лишнего для Chrome и других Chromium-брауз�
 7. Обновите открытые вкладки YouTube.
 
 Для обновления скачайте новый `ifixedyoutube.zip`, замените старые файлы и нажмите **Перезагрузить** / **Reload** на странице расширений.
+
+
+### Local checks / Локальная проверка
+
+```sh
+npm install
+npx playwright install chromium
+npm test
+npm run test:browser
+```
+
+The browser check uses the local watch fixture at five viewport widths (390–1920 px). It checks native panel visibility and click handling, horizontal overflow, five-second arrow-key seeking on a real media timeline, comments, and hidden recommendations. Gemini responses are simulated; this does not call the live service.
+
+Браузерная проверка использует локальный стенд на пяти размерах экрана (390–1920 px): панели, клики, горизонтальная прокрутка, перемотка стрелками на реальном медиаэлементе, комментарии и скрытие рекомендаций. Ответ Gemini имитируется, реальный сервис не вызывается.

@@ -31,11 +31,11 @@ test("release metadata and notes are aligned", async () => {
     "utf8"
   );
 
-  assert.equal(manifest.version, "1.8.3");
+  assert.equal(manifest.version, "1.8.4");
   assert.equal(packageJson.version, manifest.version);
-  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.3/);
-  assert.match(releaseNotes, /fullscreen post-play recommendation grid/);
-  assert.match(releaseNotes, /полноэкранная сетка рекомендаций/);
+  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.4/);
+  assert.match(releaseNotes, /horizontal watch-page overflow/);
+  assert.match(releaseNotes, /горизонтальная прокрутка/);
 });
 
 test("content script parses and contains both requested destinations", async () => {
@@ -162,7 +162,7 @@ test("watch mode hides recommendations and keeps comments opt-in", async () => {
   const source = await readFile(new URL("content.js", projectRoot), "utf8");
   const styles = await readFile(new URL("styles.css", projectRoot), "utf8");
 
-  assert.match(styles, /yt-focus-watch ytd-watch-flexy #secondary/);
+  assert.match(styles, /yt-focus-watch ytd-watch-flexy #secondary:has\(/);
   assert.match(styles, /yt-focus-watch:not\(\.yt-focus-comments-open\)/);
   assert.match(styles, /yt-focus-watch\.yt-focus-comments-open/);
   assert.doesNotMatch(styles, /yt-focus-watch ytd-watch-flexy #description/);

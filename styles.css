@@ -21,7 +21,6 @@
 
 :root.yt-focus-minimal ytd-masthead #start,
 :root.yt-focus-minimal ytd-masthead #voice-search-button,
-:root.yt-focus-minimal ytd-masthead #ai-companion-button,
 :root.yt-focus-minimal ytd-masthead #search-button-narrow,
 :root.yt-focus-minimal ytd-mini-guide-renderer,
 :root.yt-focus-minimal tp-yt-app-drawer,
@@ -68,7 +67,9 @@
 
 /* Remove the space YouTube reserves for its guide. */
 :root.yt-focus-minimal ytd-page-manager {
+  box-sizing: border-box !important;
   width: 100% !important;
+  min-width: 0 !important;
   margin-left: 0 !important;
 }
 
@@ -492,7 +493,6 @@
 }
 
 /* Watch: player + native metadata/description, without recommendations. */
-:root.yt-focus-watch ytd-watch-flexy #secondary,
 :root.yt-focus-watch ytd-watch-flexy #related,
 :root.yt-focus-watch ytd-watch-flexy #comments-leave-behind,
 :root.yt-focus-watch ytd-watch-flexy #chat,
@@ -500,8 +500,7 @@
 :root.yt-focus-watch ytd-watch-flexy yt-ghost-comments,
 :root.yt-focus-watch ytd-watch-flexy #shopping-timely-shelf,
 :root.yt-focus-watch ytd-watch-flexy #ticket-shelf,
-:root.yt-focus-watch ytd-watch-flexy #merch-shelf,
-:root.yt-focus-watch ytd-watch-flexy #expandable-metadata {
+:root.yt-focus-watch ytd-watch-flexy #merch-shelf {
   display: none !important;
 }
 
@@ -550,15 +549,70 @@
   outline-offset: 2px;
 }
 
+/* Native watch min-widths and panel offsets must not widen the document.
+   clip also prevents arrow keys from scrolling an off-screen horizontal area. */
+:root.yt-focus-watch,
+:root.yt-focus-watch body {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+:root.yt-focus-watch body {
+  position: relative;
+}
+
+:root.yt-focus-watch ytd-watch-flexy {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
 :root.yt-focus-watch ytd-watch-flexy #columns {
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
   justify-content: center !important;
+  gap: 24px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 12px 24px !important;
 }
 
 :root.yt-focus-watch ytd-watch-flexy #primary {
-  width: min(1120px, calc(100vw - 48px)) !important;
+  box-sizing: border-box !important;
+  flex: 1 1 600px !important;
+  width: 100% !important;
+  min-width: 0 !important;
   max-width: 1120px !important;
   margin: 0 auto !important;
-  padding-right: 0 !important;
+  padding: 0 !important;
+}
+
+/* Chapters, transcript and Ask/Gemini share this column with recommendations.
+   Only reserve space when YouTube opens a native engagement panel. */
+:root.yt-focus-watch ytd-watch-flexy #secondary {
+  display: none !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy #secondary:has(
+  ytd-engagement-panel-section-list-renderer[visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]
+) {
+  box-sizing: border-box !important;
+  display: block !important;
+  flex: 0 1 402px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 402px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy #secondary-inner {
+  position: static !important;
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
 @media (max-width: 860px) {
