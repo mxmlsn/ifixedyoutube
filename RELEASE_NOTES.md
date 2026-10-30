@@ -1,19 +1,15 @@
-# I Fixed YouTube 1.8.5
+# I Fixed YouTube 1.8.6
 
-- Fixed how the player and controls resize when chapters, transcript or Ask/Gemini panels open. Video scales proportionally inside its container; the timeline and right-side controls stay visible.
-- Arrow keys, M and Space now control the watch-page video without first focusing the player: left/right seek five seconds, up/down adjust volume, M toggles mute, Space toggles playback.
-- Preserved typing in comment editors, search, Gemini and other text fields. Prevented duplicate shortcut actions, page scrolling and accidental activation of focused buttons.
-- Removed page scrollbars and page scrolling while the video is fullscreen. Normal vertical scrolling returns on exit.
-- Kept recommendations hidden and native fullscreen/theater sizing intact.
+- Fixed fullscreen video rendering: windowed layout overrides no longer apply during fullscreen, including when YouTube fullscreens an ancestor of the player. Kept page scrolling disabled in fullscreen.
+- Restored rounded corners on the windowed player, including its video and controls.
+- Keyboard shortcuts now go through the native player handler first and reveal the timeline and controls for two seconds. Media controls remain a fallback if the native handler does not act. Text inputs keep normal typing behavior.
 
-Validation: 19 automated checks plus browser regressions at five viewport widths (390–1920 px), covering stale native player sizes, open/closed panels, real media seeking and playback, volume/mute, typing and keyboard focus. Live YouTube/Gemini were not tested.
+Validation: 19 automated checks plus browser regressions at five viewport widths (390–1920 px). Tests now use a real colored video and inspect screenshot pixels in both fullscreen paths, check restored corners and visible controls, and exercise native shortcut dispatch and its fallback. Live YouTube was not tested.
 
 ## Русский
 
-- Исправлено масштабирование плеера и кнопок при открытии глав, расшифровки или Ask/Gemini. Видео пропорционально вписывается в свой контейнер; полоса времени и правые кнопки остаются видимыми.
-- Стрелки, M и пробел управляют видео на странице просмотра без предварительного фокуса на плеере: влево/вправо — пять секунд, вверх/вниз — громкость, M — звук, пробел — пауза/воспроизведение.
-- Сохранён ввод текста в комментариях, поиске, Gemini и других полях. Исключены двойное срабатывание, прокрутка страницы и случайное нажатие кнопок с клавиатуры.
-- Убраны полосы прокрутки и листание страницы в полноэкранном видео. После выхода обычная вертикальная прокрутка возвращается.
-- Сохранено скрытие рекомендаций и нативные размеры в полноэкранном и широком режимах.
+- Исправлена отрисовка полноэкранного видео: стили обычного плеера больше не действуют в fullscreen, в том числе при открытии на весь экран родительского элемента. Прокрутка страницы остаётся выключенной.
+- Возвращены скругления обычного плеера, включая видео и элементы управления.
+- Горячие клавиши сначала передаются штатному обработчику плеера, а полоса времени и кнопки показываются на две секунды. При отсутствии штатной обработки предусмотрено управление медиаэлементом. Ввод текста сохранён.
 
-Проверка: 19 автоматических тестов и браузерные проверки на пяти размерах экрана (390–1920 px), включая устаревшие размеры плеера, открытие/закрытие панелей, перемотку и воспроизведение реального медиаэлемента, громкость, звук и ввод текста. На реальном YouTube/Gemini не проверялось.
+Проверка: 19 автоматических тестов и браузерные проверки на пяти размерах окна (390–1920 px). Теперь тесты используют настоящее цветное видео и проверяют пиксели скриншотов в двух вариантах fullscreen, скругления, видимость управления, передачу клавиш штатному обработчику и резервный путь. На реальном YouTube не проверялось.

@@ -623,9 +623,37 @@
   }
 
   const handledPlayerKeys = new Set();
+  const forwardedPlayerEvents = new WeakSet();
+  let playerControlsTimer = 0;
+
+  function showPlayerControls(player) {
+    player.classList.add("yt-focus-controls-visible");
+    window.clearTimeout(playerControlsTimer);
+    const bounds = player.getBoundingClientRect();
+    player.dispatchEvent(new MouseEvent("mousemove", {
+      bubbles: true, clientX: bounds.left + bounds.width / 2,
+      clientY: bounds.bottom - 30, view: window
+    }));
+    playerControlsTimer = window.setTimeout(() => {
+      player.classList.remove("yt-focus-controls-visible");
+    }, 2000);
+  }
+
+  function forwardPlayerKey(player, event, key) {
+    const keyCode = { arrowleft: 37, arrowright: 39, arrowup: 38, arrowdown: 40, m: 77, " ": 32 }[key];
+    const forwarded = new KeyboardEvent("keydown", {
+      key: key === "m" ? "m" : event.key, code: event.code,
+      keyCode, which: keyCode, bubbles: true, cancelable: true,
+      composed: true, repeat: event.repeat, view: window
+    });
+    forwardedPlayerEvents.add(forwarded);
+    player.focus({ preventScroll: true });
+    player.dispatchEvent(forwarded);
+    return forwarded.defaultPrevented;
+  }
 
   function controlWatchPlayer(event) {
-    if (getMode() !== "watch" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) {
+    if (forwardedPlayerEvents.has(event) || getMode() !== "watch" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) {
       return;
     }
     const target = event.composedPath()[0];
@@ -643,6 +671,17 @@
     if (!video || player.classList.contains("ad-showing")) {
       return;
     }
+    // Give YouTube's own handler the key first, including its visual feedback.
+    // Fall back to media controls only when the native handler did not act.
+    handledPlayerKeys.add(event.code || event.key);
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    showPlayerControls(player);
+    if (event.repeat && (key === "m" || key === " ")) return;
+    const before = [video.currentTime, video.volume, video.muted, video.paused];
+    const nativeHandled = forwardPlayerKey(player, event, key);
+    const after = [video.currentTime, video.volume, video.muted, video.paused];
+    if (nativeHandled || after.some((value, index) => value !== before[index])) return;
     if (key === "arrowleft" || key === "arrowright") {
       const ranges = video.seekable;
       const start = ranges.length ? ranges.start(0) : 0;
@@ -656,11 +695,6 @@
       else if (video.paused) video.play()?.catch(() => {});
       else video.pause();
     }
-    // Capture before YouTube and focused buttons to avoid duplicate actions,
-    // page scrolling, or activating a chapter/menu button with Space.
-    handledPlayerKeys.add(event.code || event.key);
-    event.preventDefault();
-    event.stopImmediatePropagation();
   }
 
   function releasePlayerKey(event) {

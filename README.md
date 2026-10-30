@@ -76,6 +76,6 @@ npm test
 npm run test:browser
 ```
 
-The browser check uses the local watch fixture at five viewport widths (390–1920 px). It checks native panel visibility and click handling, horizontal overflow, proportional player/control resizing, global arrow/M/Space shortcuts on a real media timeline, comments, and hidden recommendations. Gemini responses are simulated; this does not call the live service.
+The browser check uses the local watch fixture at five viewport widths (390–1920 px). It checks native panel visibility and click handling, horizontal overflow, proportional player/control resizing, fullscreen video pixels, rounded corners, global arrow/M/Space shortcuts and visible controls on a real video, comments, and hidden recommendations. Gemini responses are simulated; this does not call the live service.
 
-Браузерная проверка использует локальный стенд на пяти размерах экрана (390–1920 px): панели, клики, горизонтальная прокрутка, масштабирование плеера и кнопок, стрелки/M/пробел на реальном медиаэлементе, комментарии и скрытие рекомендаций. Ответ Gemini имитируется, реальный сервис не вызывается.
+Браузерная проверка использует локальный стенд на пяти размерах экрана (390–1920 px): панели, клики, горизонтальная прокрутка, масштабирование плеера, кадр видео в fullscreen, скругления, стрелки/M/пробел и показ управления на настоящем видео, комментарии и скрытие рекомендаций. Ответ Gemini имитируется, реальный сервис не вызывается.

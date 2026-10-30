@@ -8,17 +8,9 @@ const root = new URL('../', import.meta.url);
 const server = createServer(async (request, response) => {
   try {
     const path = new URL(request.url, 'http://localhost').pathname;
-    if (path === '/test-media.wav') {
-      // Two minutes of PCM silence: a real media timeline, no mocked currentTime.
-      const samples = 120 * 8000;
-      const wav = Buffer.alloc(44 + samples, 128);
-      wav.write('RIFF', 0); wav.writeUInt32LE(36 + samples, 4);
-      wav.write('WAVEfmt ', 8); wav.writeUInt32LE(16, 16);
-      wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
-      wav.writeUInt32LE(8000, 24); wav.writeUInt32LE(8000, 28);
-      wav.writeUInt16LE(1, 32); wav.writeUInt16LE(8, 34);
-      wav.write('data', 36); wav.writeUInt32LE(samples, 40);
-      response.setHeader('Content-Type', 'audio/wav');
+    if (path === '/test-media.webm') {
+      const wav = await readFile(new URL('test-site/video.webm', root));
+      response.setHeader('Content-Type', 'video/webm');
       response.setHeader('Accept-Ranges', 'bytes');
       const range = request.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
       if (range) {
@@ -54,6 +46,21 @@ try {
   const url = `http://127.0.0.1:${server.address().port}/test-site/watch.html?yt_focus_preview=watch&v=first`;
   const visible = async selector => assert.equal(await page.locator(selector).isVisible(), true, selector);
   const hidden = async selector => assert.equal(await page.locator(selector).isVisible(), false, selector);
+  const assertVideoPainted = async () => {
+    await page.waitForFunction(() => document.querySelector('video').readyState >= 2 && !document.querySelector('video').seeking);
+    const screenshot = (await page.screenshot()).toString('base64');
+    const rgb = await page.evaluate(async screenshot => {
+      const img = new Image();
+      img.src = 'data:image/png;base64,' + screenshot;
+      await img.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const context = canvas.getContext('2d'); context.drawImage(img, 0, 0);
+      const r = document.querySelector('video').getBoundingClientRect();
+      return Array.from(context.getImageData(Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), 1, 1).data);
+    }, screenshot);
+    assert.ok(rgb[1] > 60 && rgb[2] > 120, `Video is not painted: ${rgb}`);
+  };
   const fits = async () => {
     const dimensions = await page.evaluate(() => {
       const root = document.documentElement;
@@ -91,6 +98,8 @@ try {
     await page.waitForFunction(() => document.querySelector('video').readyState >= 2);
     await hidden('#secondary');
     await fits();
+    await assertVideoPainted();
+    assert.equal(await page.locator('#movie_player').evaluate(player => getComputedStyle(player).borderRadius), '12px');
     await page.getByRole('button', { name: 'Show chapters', exact: true }).click();
     await visible('[data-panel="chapters"]');
     await hidden('#related');
@@ -133,6 +142,13 @@ try {
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('video').evaluate(video => video.currentTime), 65);
     assert.equal(await page.evaluate(() => window.nativeKeyCount), 0);
+    assert.equal(await page.locator('.ytp-chrome-bottom').evaluate(el => getComputedStyle(el).opacity), '1');
+    assert.ok(Number(await page.locator('#movie_player').getAttribute('data-native-key-count')) > 0);
+    await page.locator('#movie_player').evaluate(player => { player.dataset.nativeDisabled = 'true'; });
+    await page.keyboard.press('ArrowLeft');
+    assert.equal(await page.locator('video').evaluate(video => video.currentTime), 60);
+    await page.locator('#movie_player').evaluate(player => { delete player.dataset.nativeDisabled; });
+    await page.locator('video').evaluate(video => { video.currentTime = 65; });
     await page.locator('#movie_player').evaluate(player => player.classList.add('ytp-fullscreen'));
     await page.keyboard.press('ArrowLeft');
     assert.equal(await page.locator('video').evaluate(video => video.currentTime), 60);
@@ -181,9 +197,12 @@ try {
       spacer.style.height = '4000px';
       document.body.append(spacer);
     });
+    await page.locator('video').evaluate(video => { video.currentTime = 60; });
+    await page.waitForFunction(() => !document.querySelector('video').seeking);
     await page.locator('#movie_player').evaluate(player => player.requestFullscreen());
     await page.waitForFunction(() => Boolean(document.fullscreenElement));
     assert.deepEqual(await page.evaluate(() => [document.documentElement, document.body].map(el => getComputedStyle(el).overflowY)), ['hidden', 'hidden']);
+    await assertVideoPainted();
     const fullscreenScroll = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 900);
     await page.keyboard.press('ArrowDown');
@@ -195,6 +214,14 @@ try {
     await page.waitForFunction(() => !document.fullscreenElement && getComputedStyle(document.documentElement).overflowY === 'visible');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY), 'visible');
     await fits();
+    // YouTube also fullscreens ytd-app; test this path while the page is scrolled.
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.locator('ytd-app').evaluate(app => app.requestFullscreen());
+    await page.waitForFunction(() => document.querySelector('#movie_player').classList.contains('ytp-fullscreen'));
+    await assertVideoPainted();
+    await page.evaluate(() => document.exitFullscreen());
+    await page.waitForFunction(() => !document.fullscreenElement && !document.querySelector('ytd-watch-flexy').hasAttribute('fullscreen'));
+    assert.equal(await page.locator('#movie_player').evaluate(player => getComputedStyle(player).borderRadius), '12px');
     // Even a late native offscreen overlay cannot create horizontal page scrolling.
     await page.evaluate(() => {
       const overflow = document.createElement('div');

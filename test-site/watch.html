@@ -24,6 +24,7 @@
       ytd-engagement-panel-section-list-renderer:not([visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]) { display: none; }
       #expandable-metadata { padding-top: 12px; }
       #player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
+      .ytp-chrome-bottom { opacity: 0; }
       .ytp-ce-element, .ytp-endscreen-content, .ytp-autonav-endscreen, .ytp-fullscreen-grid { position: absolute; inset: 20%; padding: 20px; background: #000; color: #fff; }
       .ytp-play-button { position: absolute; z-index: 1; inset: 50% auto auto 50%; transform: translate(-50%, -50%); }
       ytd-watch-metadata { display: block; padding-top: 16px; color: #fff; font: 16px Arial, sans-serif; }
@@ -57,7 +58,7 @@
               <div id="player-container-outer"><div id="player-container-inner"><div id="player">
                 <ytd-player><div id="container"><div id="movie_player" class="html5-video-player" data-test-kind="video" tabindex="0" style="width:1900px;height:1069px;overflow:hidden">
                 <div class="html5-video-container" style="position:absolute;width:1900px;height:1069px">
-                <video class="html5-main-video" preload="auto" src="/test-media.wav" style="width:1900px;height:1069px;position:absolute;left:40px;top:20px"></video></div>
+                <video class="html5-main-video" preload="auto" src="/test-media.webm" style="width:1900px;height:1069px;position:absolute;left:40px;top:20px"></video></div>
                 <div class="ytp-ce-element" data-test-kind="end-card">End-screen card</div>
                 <div class="ytp-endscreen-content" data-test-kind="recommendation-wall">Recommended videos</div>
                 <div class="ytp-autonav-endscreen" data-test-kind="autoplay-recommendation">Up next</div>
@@ -125,6 +126,20 @@
       });
       const player = document.querySelector('#player');
       const video = player.querySelector('video');
+      const nativePlayer = document.querySelector('#movie_player');
+      nativePlayer.dataset.nativeKeyCount = '0';
+      nativePlayer.addEventListener('keydown', event => {
+        if (nativePlayer.dataset.nativeDisabled) return;
+        nativePlayer.dataset.nativeKeyCount = String(Number(nativePlayer.dataset.nativeKeyCount) + 1);
+        if (event.key === 'ArrowLeft') video.currentTime = Math.max(0, video.currentTime - 5);
+        else if (event.key === 'ArrowRight') video.currentTime = Math.min(video.duration, video.currentTime + 5);
+        else if (event.key === 'ArrowUp') video.volume = Math.min(1, Math.round((video.volume + 0.05) * 100) / 100);
+        else if (event.key === 'ArrowDown') video.volume = Math.max(0, Math.round((video.volume - 0.05) * 100) / 100);
+        else if (event.key === 'm') video.muted = !video.muted;
+        else if (event.key === ' ') { if (video.paused) video.play(); else video.pause(); }
+        else return;
+        event.preventDefault(); event.stopImmediatePropagation();
+      });
       document.addEventListener('fullscreenchange', () => {
         const active = Boolean(document.fullscreenElement);
         document.querySelector('ytd-watch-flexy').toggleAttribute('fullscreen', active);
