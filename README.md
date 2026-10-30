@@ -76,6 +76,8 @@ npm test
 npm run test:browser
 ```
 
-The browser check uses the local watch fixture at five viewport widths (390–1920 px). It checks native panel visibility and click handling, horizontal overflow, proportional player/control resizing, fullscreen video pixels, rounded corners, global arrow/M/Space shortcuts and visible controls on a real video, comments, and hidden recommendations. Gemini responses are simulated; this does not call the live service.
+The browser check uses the local watch fixture at five viewport widths (390–1920 px). It checks native panel visibility, keyboard forwarding, text editing, ambient-container clipping and fullscreen video. The fixture simulates YouTube handlers, not Gemini responses from the live service.
 
-Браузерная проверка использует локальный стенд на пяти размерах экрана (390–1920 px): панели, клики, горизонтальная прокрутка, масштабирование плеера, кадр видео в fullscreen, скругления, стрелки/M/пробел и показ управления на настоящем видео, комментарии и скрытие рекомендаций. Ответ Gemini имитируется, реальный сервис не вызывается.
+For an optional live check in a fresh signed-out browser, run `npm run test:youtube`. This checks a public YouTube watch page: native keyboard feedback, fullscreen scrolling and chapter-panel resizing. It needs network access and does not test signed-in Gemini responses.
+
+Локальная браузерная проверка проходит на пяти размерах окна (390–1920 px). Дополнительная проверка на настоящем YouTube без входа в аккаунт: `npm run test:youtube`. Проверяются штатные клавиши и индикация, fullscreen и главы; ответы Gemini с авторизацией не проверяются.

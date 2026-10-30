@@ -622,86 +622,28 @@
     return new URLSearchParams(location.search).get("v") || "";
   }
 
-  const handledPlayerKeys = new Set();
   const forwardedPlayerEvents = new WeakSet();
-  let playerControlsTimer = 0;
 
-  function showPlayerControls(player) {
-    player.classList.add("yt-focus-controls-visible");
-    window.clearTimeout(playerControlsTimer);
-    const bounds = player.getBoundingClientRect();
-    player.dispatchEvent(new MouseEvent("mousemove", {
-      bubbles: true, clientX: bounds.left + bounds.width / 2,
-      clientY: bounds.bottom - 30, view: window
-    }));
-    playerControlsTimer = window.setTimeout(() => {
-      player.classList.remove("yt-focus-controls-visible");
-    }, 2000);
-  }
-
-  function forwardPlayerKey(player, event, key) {
-    const keyCode = { arrowleft: 37, arrowright: 39, arrowup: 38, arrowdown: 40, m: 77, " ": 32 }[key];
-    const forwarded = new KeyboardEvent("keydown", {
-      key: key === "m" ? "m" : event.key, code: event.code,
-      keyCode, which: keyCode, bubbles: true, cancelable: true,
-      composed: true, repeat: event.repeat, view: window
-    });
-    forwardedPlayerEvents.add(forwarded);
-    player.focus({ preventScroll: true });
-    player.dispatchEvent(forwarded);
-    return forwarded.defaultPrevented;
-  }
-
-  function controlWatchPlayer(event) {
-    if (forwardedPlayerEvents.has(event) || getMode() !== "watch" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) {
-      return;
-    }
+  function focusWatchPlayerForShortcut(event) {
+    if (forwardedPlayerEvents.has(event) || getMode() !== "watch" ||
+        event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) return;
     const target = event.composedPath()[0];
     if (!(target instanceof Element) || target.closest(
       'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"]'
-    )) {
-      return;
-    }
-    const key = event.code === "KeyM" ? "m" : event.key.toLowerCase();
-    if (!["arrowleft", "arrowright", "arrowup", "arrowdown", "m", " "].includes(key)) {
-      return;
-    }
+    )) return;
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "m", "M", " "].includes(event.key)) return;
     const player = document.querySelector("ytd-watch-flexy .html5-video-player");
-    const video = player?.querySelector("video.html5-main-video, video");
-    if (!video || player.classList.contains("ad-showing")) {
-      return;
-    }
-    // Give YouTube's own handler the key first, including its visual feedback.
-    // Fall back to media controls only when the native handler did not act.
-    handledPlayerKeys.add(event.code || event.key);
+    // Inside the player, leave the original trusted event entirely to YouTube.
+    if (!player || player.contains(target)) return;
+    player.focus({ preventScroll: true });
+    const forwarded = new KeyboardEvent("keydown", {
+      key: event.key, code: event.code, keyCode: event.keyCode, which: event.which,
+      bubbles: true, cancelable: true, composed: true, repeat: event.repeat, view: window
+    });
+    forwardedPlayerEvents.add(forwarded);
     event.preventDefault();
     event.stopImmediatePropagation();
-    showPlayerControls(player);
-    if (event.repeat && (key === "m" || key === " ")) return;
-    const before = [video.currentTime, video.volume, video.muted, video.paused];
-    const nativeHandled = forwardPlayerKey(player, event, key);
-    const after = [video.currentTime, video.volume, video.muted, video.paused];
-    if (nativeHandled || after.some((value, index) => value !== before[index])) return;
-    if (key === "arrowleft" || key === "arrowright") {
-      const ranges = video.seekable;
-      const start = ranges.length ? ranges.start(0) : 0;
-      const end = ranges.length ? ranges.end(ranges.length - 1) : video.duration;
-      if (!Number.isFinite(end) || end <= start) return;
-      video.currentTime = Math.max(start, Math.min(end, video.currentTime + (key === "arrowright" ? 5 : -5)));
-    } else if (key === "arrowup" || key === "arrowdown") {
-      video.volume = Math.max(0, Math.min(1, Math.round((video.volume + (key === "arrowup" ? 0.05 : -0.05)) * 100) / 100));
-    } else if (!event.repeat) {
-      if (key === "m") video.muted = !video.muted;
-      else if (video.paused) video.play()?.catch(() => {});
-      else video.pause();
-    }
-  }
-
-  function releasePlayerKey(event) {
-    if (handledPlayerKeys.delete(event.code || event.key)) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }
+    player.dispatchEvent(forwarded);
   }
 
   function updateCommentsButton(button) {
@@ -712,34 +654,10 @@
     button.setAttribute("aria-expanded", String(isOpen));
   }
 
-  let watchPlayerObserver = null;
-  let observedWatchPlayer = null;
-
-  function syncWatchPlayerLayout() {
-    const player = document.querySelector("ytd-watch-flexy #primary .html5-video-player");
-    if (player === observedWatchPlayer) return;
-    watchPlayerObserver?.disconnect();
-    observedWatchPlayer = player;
-    if (!player) return;
-    let lastSize = "";
-    watchPlayerObserver = new ResizeObserver(([entry]) => {
-      const size = `${Math.round(entry.contentRect.width)}x${Math.round(entry.contentRect.height)}`;
-      if (size === lastSize) return;
-      lastSize = size;
-      // Let YouTube recalculate control layout after our column changes size.
-      requestAnimationFrame(() => {
-        if (player.isConnected && getMode() === "watch") {
-          window.dispatchEvent(new Event("resize"));
-        }
-      });
-    });
-    watchPlayerObserver.observe(player);
-  }
+  let watchPanelOpen = null;
 
   function resetWatchEnhancements() {
-    watchPlayerObserver?.disconnect();
-    watchPlayerObserver = null;
-    observedWatchPlayer = null;
+    watchPanelOpen = null;
     document.documentElement.classList.remove(COMMENTS_OPEN_CLASS);
     document.querySelectorAll(`.${COMMENTS_BUTTON_CLASS}`).forEach((button) => {
       button.remove();
@@ -752,7 +670,14 @@
       return;
     }
 
-    syncWatchPlayerLayout();
+    const panelOpen = Boolean(document.querySelector(
+      'ytd-watch-flexy #secondary ytd-engagement-panel-section-list-renderer[visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]'
+    ));
+    if (panelOpen !== watchPanelOpen) {
+      watchPanelOpen = panelOpen;
+      // Let YouTube measure its own video and controls after the column toggles.
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    }
 
     const videoId = getWatchVideoId();
     if (videoId !== activeWatchVideoId) {
@@ -882,9 +807,7 @@
     requestAnimationFrame(applyMode);
   }
 
-  window.addEventListener("keydown", controlWatchPlayer, true);
-  window.addEventListener("keyup", releasePlayerKey, true);
-  window.addEventListener("blur", () => handledPlayerKeys.clear());
+  window.addEventListener("keydown", focusWatchPlayerForShortcut, true);
 
   // YouTube is a single-page app, so URL changes do not always reload scripts.
   document.addEventListener("yt-navigate-start", scheduleApply, true);
@@ -902,7 +825,9 @@
 
     scheduleApply();
   });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  observer.observe(document.documentElement, {
+    childList: true, subtree: true, attributes: true, attributeFilter: ["visibility"]
+  });
 
   applyMode();
 })();

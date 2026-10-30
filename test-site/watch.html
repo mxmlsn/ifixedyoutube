@@ -16,21 +16,29 @@
       yt-searchbox input { width: 100%; border: 1px solid #fff; border-radius: 20px 0 0 20px; padding: 0 18px; background: #000; color: #fff; }
       yt-searchbox button { width: 64px; border: 1px solid #fff; border-left: 0; border-radius: 0 20px 20px 0; background: #000; color: #fff; }
       ytd-page-manager { display: block; padding-top: 56px; }
-      #columns { display: flex; gap: 24px; padding: 12px 24px; }
-      ytd-watch-flexy { display: block; min-width: 1100px; }
-      #primary { flex: 1; min-width: 900px; }
-      #secondary-inner { position: relative; left: 0; width: 402px; }
+      #columns { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 12px 24px; }
+      ytd-watch-flexy { display: block; }
+      #primary { flex: 1 1 600px; min-width: 0; max-width: 1120px; }
+      #secondary-inner { position: relative; width: 100%; }
       ytd-engagement-panel-section-list-renderer { display: block; padding: 16px; background: #eee; }
       ytd-engagement-panel-section-list-renderer:not([visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"]) { display: none; }
       #expandable-metadata { padding-top: 12px; }
       #player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #ea3b66, #285ff0 50%, #ffd85a); }
-      .ytp-chrome-bottom { opacity: 0; }
+      #player-container-outer, #player-container-inner, ytd-player, ytd-player > #container { display: block; width: 100%; height: 100%; }
+      .html5-video-player { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; border-radius: 12px; }
+      .html5-video-container, video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+      #cinematics { position: absolute; inset: 0; box-shadow: 0 0 32px 24px #284a80; filter: blur(24px); background: #284a80; z-index: -1; }
+      .ytp-chrome-bottom { opacity: 0; position: absolute; bottom: 12px; left: 12px; width: calc(100% - 24px); }
+      .native-controls-active .ytp-chrome-bottom { opacity: 1; }
+      .html5-video-player.ytp-fullscreen { position: fixed; inset: 0; width: 100vw; height: 100vh; border-radius: 0; }
+      html:has(:fullscreen), html:has(:fullscreen) body { overflow: hidden; }
+
       .ytp-ce-element, .ytp-endscreen-content, .ytp-autonav-endscreen, .ytp-fullscreen-grid { position: absolute; inset: 20%; padding: 20px; background: #000; color: #fff; }
       .ytp-play-button { position: absolute; z-index: 1; inset: 50% auto auto 50%; transform: translate(-50%, -50%); }
       ytd-watch-metadata { display: block; padding-top: 16px; color: #fff; font: 16px Arial, sans-serif; }
       ytd-watch-metadata h1 { margin: 0 0 16px; font-size: 22px; }
       #description { margin-top: 16px; border-radius: 12px; padding: 14px; }
-      #secondary { width: 360px; padding: 20px; background: #222; color: #fff; }
+      #secondary { flex: 0 1 360px; min-width: 0; width: 360px; padding: 20px; background: #222; color: #fff; }
       #comments { display: block; margin-top: 24px; padding: 20px; background: #222; color: #fff; }
     </style>
   </head>
@@ -55,10 +63,10 @@
         <ytd-watch-flexy>
           <div id="columns">
             <div id="primary">
-              <div id="player-container-outer"><div id="player-container-inner"><div id="player">
-                <ytd-player><div id="container"><div id="movie_player" class="html5-video-player" data-test-kind="video" tabindex="0" style="width:1900px;height:1069px;overflow:hidden">
-                <div class="html5-video-container" style="position:absolute;width:1900px;height:1069px">
-                <video class="html5-main-video" preload="auto" src="/test-media.webm" style="width:1900px;height:1069px;position:absolute;left:40px;top:20px"></video></div>
+              <div id="player-container-outer"><div id="player-container-inner"><div id="player"><div id="cinematics"></div>
+                <ytd-player><div id="container"><div id="movie_player" class="html5-video-player" data-test-kind="video" tabindex="0" >
+                <div class="html5-video-container" >
+                <video class="html5-main-video" preload="auto" src="/test-media.webm" ></video></div>
                 <div class="ytp-ce-element" data-test-kind="end-card">End-screen card</div>
                 <div class="ytp-endscreen-content" data-test-kind="recommendation-wall">Recommended videos</div>
                 <div class="ytp-autonav-endscreen" data-test-kind="autoplay-recommendation">Up next</div>
@@ -69,7 +77,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="ytp-chrome-bottom" style="position:absolute;bottom:12px;left:12px;width:1876px">
+                <div class="ytp-chrome-bottom" >
                   <div class="ytp-progress-bar-container" style="width:100%;height:8px;background:red"></div>
                   <div class="ytp-chrome-controls" style="display:flex;justify-content:space-between">
                     <button class="ytp-play-button" data-test-kind="replay" style="position:static;transform:none">Replay</button>
@@ -129,7 +137,8 @@
       const nativePlayer = document.querySelector('#movie_player');
       nativePlayer.dataset.nativeKeyCount = '0';
       nativePlayer.addEventListener('keydown', event => {
-        if (nativePlayer.dataset.nativeDisabled) return;
+        nativePlayer.classList.add('native-controls-active');
+        if (event.repeat && ['m', ' '].includes(event.key)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
         nativePlayer.dataset.nativeKeyCount = String(Number(nativePlayer.dataset.nativeKeyCount) + 1);
         if (event.key === 'ArrowLeft') video.currentTime = Math.max(0, video.currentTime - 5);
         else if (event.key === 'ArrowRight') video.currentTime = Math.min(video.duration, video.currentTime + 5);

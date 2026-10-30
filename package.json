@@ -1,10 +1,11 @@
 {
   "name": "ifixedyoutube",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "private": true,
   "scripts": {
     "test": "node --test",
-    "test:browser": "node scripts/check-watch.mjs"
+    "test:browser": "node scripts/check-watch.mjs",
+    "test:youtube": "node scripts/check-youtube.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"
