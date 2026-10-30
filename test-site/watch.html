@@ -54,8 +54,10 @@
         <ytd-watch-flexy>
           <div id="columns">
             <div id="primary">
-              <div id="player" class="html5-video-player" data-test-kind="video" tabindex="0">
-                <video preload="auto" src="/test-media.wav" style="width:100%;height:100%;position:absolute;inset:0"></video>
+              <div id="player-container-outer"><div id="player-container-inner"><div id="player">
+                <ytd-player><div id="container"><div id="movie_player" class="html5-video-player" data-test-kind="video" tabindex="0" style="width:1900px;height:1069px;overflow:hidden">
+                <div class="html5-video-container" style="position:absolute;width:1900px;height:1069px">
+                <video class="html5-main-video" preload="auto" src="/test-media.wav" style="width:1900px;height:1069px;position:absolute;left:40px;top:20px"></video></div>
                 <div class="ytp-ce-element" data-test-kind="end-card">End-screen card</div>
                 <div class="ytp-endscreen-content" data-test-kind="recommendation-wall">Recommended videos</div>
                 <div class="ytp-autonav-endscreen" data-test-kind="autoplay-recommendation">Up next</div>
@@ -66,8 +68,15 @@
                     </div>
                   </div>
                 </div>
-                <button class="ytp-play-button" data-test-kind="replay">Replay</button>
-              </div>
+                <div class="ytp-chrome-bottom" style="position:absolute;bottom:12px;left:12px;width:1876px">
+                  <div class="ytp-progress-bar-container" style="width:100%;height:8px;background:red"></div>
+                  <div class="ytp-chrome-controls" style="display:flex;justify-content:space-between">
+                    <button class="ytp-play-button" data-test-kind="replay" style="position:static;transform:none">Replay</button>
+                    <button class="ytp-fullscreen-button">Fullscreen</button>
+                  </div>
+                </div>
+                </div></div></ytd-player>
+              </div></div></div>
               <div id="below">
                 <div class="box">
                   <ytd-watch-metadata>
@@ -80,7 +89,7 @@
                   </ytd-watch-metadata>
                 </div>
                 <div class="box">
-                  <ytd-comments id="comments" data-test-kind="comments">Comments</ytd-comments>
+                  <ytd-comments id="comments" data-test-kind="comments">Comments <div contenteditable="true" role="textbox" aria-label="Add a comment"></div></ytd-comments>
                 </div>
               </div>
             </div>
@@ -116,6 +125,11 @@
       });
       const player = document.querySelector('#player');
       const video = player.querySelector('video');
+      document.addEventListener('fullscreenchange', () => {
+        const active = Boolean(document.fullscreenElement);
+        document.querySelector('ytd-watch-flexy').toggleAttribute('fullscreen', active);
+        document.querySelector('#movie_player').classList.toggle('ytp-fullscreen', active);
+      });
       document.querySelector('[data-seek]').addEventListener('click', event => {
         video.currentTime = Number(event.target.dataset.seek);
       });

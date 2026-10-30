@@ -622,40 +622,52 @@
     return new URLSearchParams(location.search).get("v") || "";
   }
 
-  function seekFocusedPlayer(event) {
-    if (
-      getMode() !== "watch" ||
-      (event.key !== "ArrowLeft" && event.key !== "ArrowRight") ||
-      event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
-      event.defaultPrevented || document.fullscreenElement
-    ) {
+  const handledPlayerKeys = new Set();
+
+  function controlWatchPlayer(event) {
+    if (getMode() !== "watch" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) {
       return;
     }
-
-    const target = event.target;
-    if (!(target instanceof Element)) {
+    const target = event.composedPath()[0];
+    if (!(target instanceof Element) || target.closest(
+      'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"]'
+    )) {
       return;
     }
-
-    const player = target.closest(".html5-video-player");
-    if (
-      !player || player.classList.contains("ytp-fullscreen") ||
-      target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="slider"], [role="menuitem"]')
-    ) {
+    const key = event.code === "KeyM" ? "m" : event.key.toLowerCase();
+    if (!["arrowleft", "arrowright", "arrowup", "arrowdown", "m", " "].includes(key)) {
       return;
     }
-
-    const video = player.querySelector("video");
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
+    const player = document.querySelector("ytd-watch-flexy .html5-video-player");
+    const video = player?.querySelector("video.html5-main-video, video");
+    if (!video || player.classList.contains("ad-showing")) {
       return;
     }
-
-    // Handle the focused, windowed player before page scrolling or native
-    // handlers. Stop propagation so YouTube cannot seek a second time.
-    const step = event.key === "ArrowRight" ? 5 : -5;
-    video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + step));
+    if (key === "arrowleft" || key === "arrowright") {
+      const ranges = video.seekable;
+      const start = ranges.length ? ranges.start(0) : 0;
+      const end = ranges.length ? ranges.end(ranges.length - 1) : video.duration;
+      if (!Number.isFinite(end) || end <= start) return;
+      video.currentTime = Math.max(start, Math.min(end, video.currentTime + (key === "arrowright" ? 5 : -5)));
+    } else if (key === "arrowup" || key === "arrowdown") {
+      video.volume = Math.max(0, Math.min(1, Math.round((video.volume + (key === "arrowup" ? 0.05 : -0.05)) * 100) / 100));
+    } else if (!event.repeat) {
+      if (key === "m") video.muted = !video.muted;
+      else if (video.paused) video.play()?.catch(() => {});
+      else video.pause();
+    }
+    // Capture before YouTube and focused buttons to avoid duplicate actions,
+    // page scrolling, or activating a chapter/menu button with Space.
+    handledPlayerKeys.add(event.code || event.key);
     event.preventDefault();
     event.stopImmediatePropagation();
+  }
+
+  function releasePlayerKey(event) {
+    if (handledPlayerKeys.delete(event.code || event.key)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   }
 
   function updateCommentsButton(button) {
@@ -666,7 +678,34 @@
     button.setAttribute("aria-expanded", String(isOpen));
   }
 
+  let watchPlayerObserver = null;
+  let observedWatchPlayer = null;
+
+  function syncWatchPlayerLayout() {
+    const player = document.querySelector("ytd-watch-flexy #primary .html5-video-player");
+    if (player === observedWatchPlayer) return;
+    watchPlayerObserver?.disconnect();
+    observedWatchPlayer = player;
+    if (!player) return;
+    let lastSize = "";
+    watchPlayerObserver = new ResizeObserver(([entry]) => {
+      const size = `${Math.round(entry.contentRect.width)}x${Math.round(entry.contentRect.height)}`;
+      if (size === lastSize) return;
+      lastSize = size;
+      // Let YouTube recalculate control layout after our column changes size.
+      requestAnimationFrame(() => {
+        if (player.isConnected && getMode() === "watch") {
+          window.dispatchEvent(new Event("resize"));
+        }
+      });
+    });
+    watchPlayerObserver.observe(player);
+  }
+
   function resetWatchEnhancements() {
+    watchPlayerObserver?.disconnect();
+    watchPlayerObserver = null;
+    observedWatchPlayer = null;
     document.documentElement.classList.remove(COMMENTS_OPEN_CLASS);
     document.querySelectorAll(`.${COMMENTS_BUTTON_CLASS}`).forEach((button) => {
       button.remove();
@@ -678,6 +717,8 @@
     if (getMode() !== "watch") {
       return;
     }
+
+    syncWatchPlayerLayout();
 
     const videoId = getWatchVideoId();
     if (videoId !== activeWatchVideoId) {
@@ -807,7 +848,9 @@
     requestAnimationFrame(applyMode);
   }
 
-  document.addEventListener("keydown", seekFocusedPlayer, true);
+  window.addEventListener("keydown", controlWatchPlayer, true);
+  window.addEventListener("keyup", releasePlayerKey, true);
+  window.addEventListener("blur", () => handledPlayerKeys.clear());
 
   // YouTube is a single-page app, so URL changes do not always reload scripts.
   document.addEventListener("yt-navigate-start", scheduleApply, true);

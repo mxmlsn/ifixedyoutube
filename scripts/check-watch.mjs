@@ -57,7 +57,7 @@ try {
   const fits = async () => {
     const dimensions = await page.evaluate(() => {
       const root = document.documentElement;
-      const selectors = ['#primary', '#player', '#secondary'];
+      const selectors = ['#primary', '#player', '#movie_player', 'video', '.ytp-chrome-bottom', '.ytp-fullscreen-button', '#secondary'];
       return {
         viewport: root.clientWidth,
         document: root.scrollWidth,
@@ -67,6 +67,18 @@ try {
         })
       };
     });
+    const playerBoxes = await page.evaluate(() => {
+      const selectors = ['#player', '#movie_player', 'video', '.ytp-chrome-bottom', '.ytp-fullscreen-button'];
+      return selectors.map(s => {
+        const r = document.querySelector(s).getBoundingClientRect();
+        return { selector: s, left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
+      });
+    });
+    const box = playerBoxes[0];
+    assert.ok(Math.abs(box.width / box.height - 16 / 9) < 0.01);
+    for (const child of playerBoxes.slice(1)) {
+      assert.ok(child.left >= box.left - 1 && child.right <= box.right + 1 && child.top >= box.top - 1 && child.bottom <= box.bottom + 1, JSON.stringify(playerBoxes));
+    }
     assert.ok(dimensions.document <= dimensions.viewport, JSON.stringify(dimensions));
     for (const [selector, left, right] of dimensions.boxes) {
       assert.ok(left >= 0 && right <= dimensions.viewport + 1, `${selector}: ${JSON.stringify(dimensions)}`);
@@ -106,58 +118,83 @@ try {
     await hidden('#comments');
     for (const selector of ['.ytp-ce-element', '.ytp-endscreen-content', '.ytp-autonav-endscreen', '.ytp-fullscreen-grid']) await hidden(selector);
     await visible('.ytp-play-button');
-    await page.locator('#player').focus();
+    await page.locator('#movie_player').focus();
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('video').evaluate(video => video.currentTime), 65);
     await page.keyboard.press('ArrowLeft');
     assert.equal(await page.locator('video').evaluate(video => video.currentTime), 60);
-    // A native handler must not receive a handled arrow (which would double seek).
+    // These shortcuts also work with focus outside the player, including buttons.
     await page.evaluate(() => {
-      const player = document.querySelector('#player');
-      player.dataset.nativeKeys = '0';
-      player.addEventListener('keydown', event => {
-        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-        player.dataset.nativeKeys = String(Number(player.dataset.nativeKeys) + 1);
-        const video = player.querySelector('video');
-        video.currentTime += event.key === 'ArrowRight' ? 5 : -5;
-      });
+      document.body.tabIndex = -1;
+      document.body.focus();
+      window.nativeKeyCount = 0;
+      document.addEventListener('keydown', () => window.nativeKeyCount++);
     });
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('video').evaluate(video => video.currentTime), 65);
-    assert.equal(await page.locator('#player').getAttribute('data-native-keys'), '0');
-    await page.keyboard.press('Shift+ArrowRight');
-    assert.equal(await page.locator('#player').getAttribute('data-native-keys'), '1');
-    // Fullscreen keeps native key handling.
-    await page.locator('#player').evaluate(player => player.classList.add('ytp-fullscreen'));
+    assert.equal(await page.evaluate(() => window.nativeKeyCount), 0);
+    await page.locator('#movie_player').evaluate(player => player.classList.add('ytp-fullscreen'));
     await page.keyboard.press('ArrowLeft');
-    assert.equal(await page.locator('#player').getAttribute('data-native-keys'), '2');
-    await page.locator('#player').evaluate(player => player.classList.remove('ytp-fullscreen'));
-    // Typing outside the player must not seek the video.
-    const beforeTyping = await page.locator('video').evaluate(video => video.currentTime);
-    await page.locator('yt-searchbox input').fill('search text');
-    await page.keyboard.press('ArrowLeft');
-    assert.equal(await page.locator('video').evaluate(video => video.currentTime), beforeTyping);
-    // Native volume controls still receive up/down arrows.
-    await page.evaluate(() => {
-      const player = document.querySelector('#player');
-      player.querySelector('video').volume = 0.5;
-      player.addEventListener('keydown', event => {
-        const video = player.querySelector('video');
-        if (event.key === 'ArrowUp') video.volume += 0.05;
-        if (event.key === 'ArrowDown') video.volume -= 0.05;
-      });
-    });
-    await page.locator('#player').focus();
+    assert.equal(await page.locator('video').evaluate(video => video.currentTime), 60);
+    await page.locator('#movie_player').evaluate(player => player.classList.remove('ytp-fullscreen'));
+    await page.locator('video').evaluate(video => { video.volume = 0.5; });
     await page.keyboard.press('ArrowUp');
     assert.equal(await page.locator('video').evaluate(video => video.volume), 0.55);
     await page.keyboard.press('ArrowDown');
     assert.equal(await page.locator('video').evaluate(video => video.volume), 0.5);
+    await page.keyboard.press('m');
+    assert.equal(await page.locator('video').evaluate(video => video.muted), true);
+    await page.keyboard.press('m');
+    assert.equal(await page.locator('video').evaluate(video => video.muted), false);
+    await page.keyboard.down('m');
+    await page.keyboard.down('m');
+    assert.equal(await page.locator('video').evaluate(video => video.muted), true);
+    await page.keyboard.up('m');
+    // Space must pause/play, not activate the focused chapter-panel button.
+    await page.getByRole('button', { name: 'Show chapters', exact: true }).focus();
+    await page.keyboard.press('Space');
+    await page.waitForFunction(() => !document.querySelector('video').paused);
+    await hidden('#secondary');
+    await page.keyboard.press('Space');
+    await page.waitForFunction(() => document.querySelector('video').paused);
+    await hidden('#secondary');
+    await page.getByRole('button', { name: 'Show comments', exact: true }).click();
+    const comment = page.getByRole('textbox', { name: 'Add a comment' });
+    await comment.fill('test');
+    const beforeTyping = await page.locator('video').evaluate(video => ({ time: video.currentTime, volume: video.volume, muted: video.muted, paused: video.paused }));
+    for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'm', 'Space']) await page.keyboard.press(key);
+    assert.deepEqual(await page.locator('video').evaluate(video => ({ time: video.currentTime, volume: video.volume, muted: video.muted, paused: video.paused })), beforeTyping);
+    assert.match(await comment.textContent(), /m/);
+    await page.locator('yt-searchbox input').fill('search text');
+    await page.keyboard.press('ArrowLeft');
+    assert.equal(await page.locator('video').evaluate(video => video.currentTime), beforeTyping.time);
+    await page.getByRole('button', { name: 'Hide comments', exact: true }).click();
     for (const [time, key, expected] of [[2, 'ArrowLeft', 0], [118, 'ArrowRight', 120]]) {
       await page.locator('video').evaluate((video, time) => { video.currentTime = time; }, time);
       await page.waitForFunction(() => !document.querySelector('video').seeking);
       await page.keyboard.press(key);
       assert.equal(await page.locator('video').evaluate(video => video.currentTime), expected);
     }
+    // Enter the real Fullscreen API with a deliberately scrollable document.
+    await page.evaluate(() => {
+      const spacer = document.createElement('div');
+      spacer.style.height = '4000px';
+      document.body.append(spacer);
+    });
+    await page.locator('#movie_player').evaluate(player => player.requestFullscreen());
+    await page.waitForFunction(() => Boolean(document.fullscreenElement));
+    assert.deepEqual(await page.evaluate(() => [document.documentElement, document.body].map(el => getComputedStyle(el).overflowY)), ['hidden', 'hidden']);
+    const fullscreenScroll = await page.evaluate(() => window.scrollY);
+    await page.mouse.wheel(0, 900);
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Space');
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(200);
+    assert.equal(await page.evaluate(() => window.scrollY), fullscreenScroll);
+    await page.evaluate(() => document.exitFullscreen());
+    await page.waitForFunction(() => !document.fullscreenElement && getComputedStyle(document.documentElement).overflowY === 'visible');
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY), 'visible');
+    await fits();
     // Even a late native offscreen overlay cannot create horizontal page scrolling.
     await page.evaluate(() => {
       const overflow = document.createElement('div');
@@ -168,7 +205,7 @@ try {
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => window.scrollX), 0);
-    console.log(`PASS ${width}px: chapters, Gemini, comments, recommendations, arrows and overflow`);
+    console.log(`PASS ${width}px: chapters, Gemini, comments, recommendations, shortcuts, resizing, fullscreen and overflow`);
   }
   assert.deepEqual(errors, []);
 } finally {

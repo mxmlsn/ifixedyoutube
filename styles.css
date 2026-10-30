@@ -561,6 +561,15 @@
   position: relative;
 }
 
+/* Override the normal watch-page scrolling while the video is fullscreen.
+   Cover both the browser top layer and YouTube's fullscreen transition flags. */
+:root.yt-focus-watch:is(:fullscreen, :has(:fullscreen), :has(ytd-watch-flexy[fullscreen]), :has(.html5-video-player.ytp-fullscreen)),
+:root.yt-focus-watch:is(:fullscreen, :has(:fullscreen), :has(ytd-watch-flexy[fullscreen]), :has(.html5-video-player.ytp-fullscreen)) body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+
 :root.yt-focus-watch ytd-watch-flexy {
   box-sizing: border-box !important;
   width: 100% !important;
@@ -588,6 +597,56 @@
   max-width: 1120px !important;
   margin: 0 auto !important;
   padding: 0 !important;
+}
+
+/* YouTube writes pixel sizes onto the video and controls. Those sizes can lag
+   behind a sidebar resize; keep the entire windowed player in its own box. */
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary :is(#player-container-outer, #player-container-inner, #player) {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  padding: 0 !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary #player {
+  position: relative !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary #player :is(ytd-player, ytd-player > #container, .html5-video-player:not(.ytp-fullscreen)) {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary #player .html5-video-player:not(.ytp-fullscreen) {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary .html5-video-player:not(.ytp-fullscreen) :is(.html5-video-container, video) {
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary .html5-video-player:not(.ytp-fullscreen) video {
+  object-fit: contain !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary .html5-video-player:not(.ytp-fullscreen) .ytp-chrome-bottom {
+  box-sizing: border-box !important;
+  left: 12px !important;
+  right: 12px !important;
+  width: calc(100% - 24px) !important;
+}
+
+:root.yt-focus-watch ytd-watch-flexy:not([theater]):not([fullscreen]) #primary .html5-video-player:not(.ytp-fullscreen) :is(.ytp-progress-bar-container, .ytp-chrome-controls) {
+  width: 100% !important;
 }
 
 /* Chapters, transcript and Ask/Gemini share this column with recommendations.
