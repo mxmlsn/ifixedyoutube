@@ -29,6 +29,7 @@ try {
   await focusPage();
   await page.keyboard.press('Space');
   await page.waitForFunction(() => !document.querySelector('video').paused);
+  await page.waitForTimeout(350);
   await page.keyboard.press('Space');
   await page.waitForFunction(() => document.querySelector('video').paused);
   console.log('PASS live: native seeking, mute, playback and visible controls');
@@ -42,9 +43,19 @@ try {
   });
   const beforeWheel = await fullscreenState();
   assert.deepEqual(beforeWheel.slice(0, 4), [0, 0, 1440, 1000]);
-  await page.mouse.wheel(0, 900);
-  await page.waitForTimeout(400);
-  assert.deepEqual(await fullscreenState(), beforeWheel);
+  await page.evaluate(() => {
+    window.fullscreenWheelEvents = 0;
+    document.addEventListener('wheel', () => window.fullscreenWheelEvents++);
+  });
+  for (const [x, y] of [[720, 300], [720, 950], [30, 500]]) {
+    await page.mouse.move(x, y);
+    for (const [dx, dy] of [[0, 900], [0, -900], [900, 0]]) {
+      await page.mouse.wheel(dx, dy);
+      await page.waitForTimeout(100);
+      assert.deepEqual(await fullscreenState(), beforeWheel);
+    }
+  }
+  assert.equal(await page.evaluate(() => window.fullscreenWheelEvents), 0);
   await page.evaluate(() => document.exitFullscreen());
   await page.waitForFunction(() => !document.querySelector('ytd-watch-flexy').hasAttribute('fullscreen'));
   console.log('PASS live: native fullscreen fills viewport and does not scroll');
@@ -61,7 +72,12 @@ try {
   });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 1440);
   assert.equal(await page.locator('ytd-watch-flexy #player').evaluate(el => getComputedStyle(el).overflow), 'visible');
-  console.log('PASS live: chapter panel, native video/control sizing, unclipped ambient container');
+  await page.mouse.move(700, 800);
+  await page.mouse.wheel(1800, 0);
+  await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => scrollX), 0);
+  assert.ok(await page.evaluate(() => window.fullscreenWheelEvents) > 0);
+  console.log('PASS live: chapter panel, native sizing, unclipped ambient container, horizontal scrolling blocked and normal wheel restored');
 } finally {
   await browser.close();
 }

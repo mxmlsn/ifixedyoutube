@@ -646,6 +646,15 @@
     player.dispatchEvent(forwarded);
   }
 
+  function preventFullscreenScroll(event) {
+    if (getMode() !== "watch" || !(document.fullscreenElement ||
+        document.querySelector("ytd-watch-flexy[fullscreen], ytd-watch-flexy .ytp-fullscreen"))) return;
+    // YouTube also handles wheel gestures to reveal page details in fullscreen.
+    // Stop that gesture here; no player sizing or keyboard behavior is changed.
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
   function updateCommentsButton(button) {
     const isOpen = document.documentElement.classList.contains(
       COMMENTS_OPEN_CLASS
@@ -808,6 +817,8 @@
   }
 
   window.addEventListener("keydown", focusWatchPlayerForShortcut, true);
+  window.addEventListener("wheel", preventFullscreenScroll, { capture: true, passive: false });
+  window.addEventListener("touchmove", preventFullscreenScroll, { capture: true, passive: false });
 
   // YouTube is a single-page app, so URL changes do not always reload scripts.
   document.addEventListener("yt-navigate-start", scheduleApply, true);

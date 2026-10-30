@@ -549,6 +549,19 @@
   outline-offset: 2px;
 }
 
+/* Constrain page scrolling only, without clipping the player's ambient layer. */
+:root.yt-focus-watch,
+:root.yt-focus-watch body,
+:root.yt-focus-watch ytd-app {
+  overflow-x: clip !important;
+}
+
+:root.yt-focus-watch:is(:fullscreen, :has(:fullscreen, ytd-watch-flexy[fullscreen], ytd-watch-flexy .ytp-fullscreen)),
+:root.yt-focus-watch:is(:fullscreen, :has(:fullscreen, ytd-watch-flexy[fullscreen], ytd-watch-flexy .ytp-fullscreen)) body,
+:root.yt-focus-watch:is(:fullscreen, :has(:fullscreen, ytd-watch-flexy[fullscreen], ytd-watch-flexy .ytp-fullscreen)) ytd-app {
+  overflow-y: hidden !important;
+}
+
 /* Keep YouTube's own player sizing, ambient lighting, corners and fullscreen.
    Recommendations stay hidden, but native chapters/Ask panels can open. */
 :root.yt-focus-watch ytd-watch-flexy #secondary:not(:has(

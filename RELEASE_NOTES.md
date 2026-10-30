@@ -1,15 +1,15 @@
-# I Fixed YouTube 1.8.7
+# I Fixed YouTube 1.8.8
 
-- Restored the native player layout, ambient lighting, rounded corners, fullscreen and scrolling behavior. Removed extension overrides for video dimensions, clipping, positioning and controls visibility.
-- Kept native chapters/transcript/Ask panels available. On panel open/close, YouTube receives a resize notification and calculates its own video and control sizes.
-- Shortcuts inside the player are untouched. Outside it, arrows, M and Space are forwarded to the native player, except in text inputs. Removed direct media manipulation and custom feedback timers.
+- Blocked horizontal page scrolling on the watch page at the document/app boundary, without changing player sizing or clipping its ambient-light container.
+- Blocked wheel and touch scrolling only during fullscreen video, including YouTube's wheel gesture that reveals page details. Fullscreen page scrollbars are hidden; normal wheel behavior returns on exit.
+- Kept native video sizing, rounded corners, controls, keyboard feedback and side panels.
 
-Validation: automated checks and five local viewport sizes, plus a fresh signed-out browser on the actual YouTube watch page. Confirmed native seeking/mute/playback feedback, fullscreen without page scrolling, chapter-panel resizing and no horizontal overflow. Signed-in Gemini responses were not tested.
+Validation: automated tests, five local viewport sizes, and live YouTube checks for horizontal wheel scrolling, fullscreen wheel gestures at multiple positions and directions, native keyboard feedback and chapter-panel sizing.
 
 ## Русский
 
-- Возвращена штатная разметка плеера: подсветка фона, скругления, fullscreen и прокрутка. Удалены переопределения размеров, обрезки, позиционирования видео и видимости управления.
-- Сохранён доступ к панелям глав, расшифровки и Ask. При открытии/закрытии панели YouTube получает уведомление об изменении размера и сам пересчитывает видео и кнопки.
-- Клавиши внутри плеера не перехватываются. Вне него стрелки, M и пробел передаются штатному плееру, кроме полей ввода. Убраны прямое изменение медиа и собственные таймеры индикации.
+- Убрана горизонтальная прокрутка страницы видео на уровне документа и приложения, без изменения размеров плеера и обрезки фоновой подсветки.
+- Колесо и сенсорная прокрутка блокируются только в полноэкранном видео, включая жест YouTube для показа деталей страницы. Полосы прокрутки в fullscreen скрыты, после выхода обычная обработка колеса возвращается.
+- Сохранены штатные размеры, скругления, управление, индикация клавиш и боковые панели.
 
-Проверено автоматическими тестами, на пяти локальных размерах окна и на настоящей странице YouTube в новом браузере без входа в аккаунт: перемотка, звук, пауза, штатная индикация, fullscreen без прокрутки, главы и отсутствие горизонтального переполнения. Ответы Gemini с авторизацией не проверялись.
+Проверка: автоматические тесты, пять локальных размеров окна и настоящий YouTube — горизонтальное колесо, жесты в fullscreen в разных направлениях и точках, штатные клавиши и размеры видео при открытии глав.

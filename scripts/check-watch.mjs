@@ -200,6 +200,10 @@ try {
     await page.waitForFunction(() => Boolean(document.fullscreenElement));
     assert.deepEqual(await page.evaluate(() => [document.documentElement, document.body].map(el => getComputedStyle(el).overflowY)), ['hidden', 'hidden']);
     await assertVideoPainted();
+    await page.evaluate(() => {
+      window.nativeWheelCount = 0;
+      document.addEventListener('wheel', () => window.nativeWheelCount++);
+    });
     const fullscreenScroll = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 900);
     await page.keyboard.press('ArrowDown');
@@ -207,6 +211,7 @@ try {
     await page.keyboard.press('Space');
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => window.scrollY), fullscreenScroll);
+    assert.equal(await page.evaluate(() => window.nativeWheelCount), 0);
     await page.evaluate(() => document.exitFullscreen());
     await page.waitForFunction(() => !document.fullscreenElement && !document.querySelector('ytd-watch-flexy').hasAttribute('fullscreen') && !document.querySelector('#movie_player').classList.contains('ytp-fullscreen'));
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY), 'visible');
@@ -220,6 +225,10 @@ try {
     await page.waitForFunction(() => !document.fullscreenElement && !document.querySelector('ytd-watch-flexy').hasAttribute('fullscreen'));
     assert.equal(await page.locator('#movie_player').evaluate(player => getComputedStyle(player).borderRadius), '12px');
     assert.equal(await page.locator('#player').evaluate(player => getComputedStyle(player).overflow), 'visible');
+    await page.mouse.wheel(1200, 0);
+    await page.waitForTimeout(100);
+    assert.equal(await page.evaluate(() => window.scrollX), 0);
+    assert.ok(await page.evaluate(() => window.nativeWheelCount) > 0);
     console.log(`PASS ${width}px: chapters, Gemini, comments, recommendations, shortcuts, resizing, fullscreen and overflow`);
   }
   assert.deepEqual(errors, []);

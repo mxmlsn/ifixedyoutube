@@ -31,11 +31,11 @@ test("release metadata and notes are aligned", async () => {
     "utf8"
   );
 
-  assert.equal(manifest.version, "1.8.7");
+  assert.equal(manifest.version, "1.8.8");
   assert.equal(packageJson.version, manifest.version);
-  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.7/);
-  assert.match(releaseNotes, /native player layout/);
-  assert.match(releaseNotes, /штатная разметка плеера/);
+  assert.match(releaseNotes, /I Fixed YouTube 1\.8\.8/);
+  assert.match(releaseNotes, /horizontal page scrolling/);
+  assert.match(releaseNotes, /горизонтальная прокрутка/);
 });
 
 test("content script parses and contains both requested destinations", async () => {
